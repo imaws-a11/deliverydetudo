@@ -1,0 +1,5 @@
+/* Clear existing styles to use Tailwind from index.html */
+body {
+  margin: 0;
+  padding: 0;
+}
