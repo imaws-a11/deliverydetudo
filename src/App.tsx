@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { supabase } from './lib/supabase';
 
 // Mock Data
 const SERVICES = [
@@ -111,7 +112,7 @@ function App() {
               </div>
             </div>
             {/* Floating Widget */}
-            <div className="absolute -bottom-6 -right-4 glass p-4 rounded-3xl shadow-gold-glow border border-white/20 animate-bounce cursor-default">
+            <div className="absolute -bottom-6 -right-4 glass p-4 rounded-3xl shadow-soft border border-white/20 animate-bounce cursor-default">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-xl bg-primary flex items-center justify-center">
                   <span className="material-symbols-outlined text-slate-900 font-bold">bolt</span>
@@ -138,7 +139,7 @@ function App() {
 
           <div className="flex flex-col gap-8">
             <div className="flex w-full flex-row items-center justify-center gap-3">
-              <div className="h-1.5 w-12 rounded-full bg-primary shadow-gold-glow"></div>
+              <div className="h-1.5 w-12 rounded-full bg-primary shadow-soft"></div>
               <div className="h-1.5 w-1.5 rounded-full bg-slate-200 dark:bg-slate-800"></div>
               <div className="h-1.5 w-1.5 rounded-full bg-slate-200 dark:bg-slate-800"></div>
             </div>
@@ -199,7 +200,7 @@ function App() {
                   <span className="material-symbols-outlined text-primary text-xl">alternate_email</span>
                 </div>
                 <input
-                  className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-premium"
+                  className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-floating"
                   placeholder="ricardo.oliveira@email.com"
                   type="email"
                   defaultValue="ricardo.oliveira@email.com"
@@ -217,7 +218,7 @@ function App() {
                   <span className="material-symbols-outlined text-primary text-xl">lock</span>
                 </div>
                 <input
-                  className="block w-full pl-14 pr-16 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-premium"
+                  className="block w-full pl-14 pr-16 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-floating"
                   placeholder="••••••••"
                   type={showPassword ? "text" : "password"}
                   defaultValue="password123"
@@ -280,7 +281,7 @@ function App() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div
-              className="size-12 rounded-2xl bg-primary flex items-center justify-center text-slate-900 font-bold shadow-gold-glow cursor-pointer active:scale-90 transition-all bg-center bg-cover border border-white/20"
+              className="size-12 rounded-2xl bg-primary flex items-center justify-center text-slate-900 font-bold shadow-soft cursor-pointer active:scale-90 transition-all bg-center bg-cover border border-white/20"
               style={{ backgroundImage: `url('${userData.avatar}')` }}
               onClick={() => setActiveTab('profile')}
             />
@@ -294,7 +295,7 @@ function App() {
             </div>
           </div>
           <button
-            className="size-12 rounded-2xl glass border border-white/10 dark:border-white/5 flex items-center justify-center relative active:scale-90 transition-all shadow-premium"
+            className="size-12 rounded-2xl glass border border-white/10 dark:border-white/5 flex items-center justify-center relative active:scale-90 transition-all shadow-floating"
             onClick={() => {
               setNotifications(0);
               setCurrentView('notifications');
@@ -311,7 +312,7 @@ function App() {
             <span className="material-symbols-outlined text-primary group-focus-within:scale-125 transition-transform duration-500">search</span>
           </div>
           <input
-            className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-premium"
+            className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-floating"
             placeholder="O que você deseja hoje?"
             type="text"
             onFocus={() => setActiveTab('search')}
@@ -325,7 +326,7 @@ function App() {
           <motion.div
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            className="relative w-full h-[220px] rounded-[48px] overflow-hidden group cursor-pointer shadow-premium"
+            className="relative w-full h-[220px] rounded-[48px] overflow-hidden group cursor-pointer shadow-floating"
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 p-10 flex flex-col justify-end">
               <span className="text-primary text-[10px] font-black uppercase tracking-[0.4em] mb-3">Programa Fidelidade Lux</span>
@@ -357,7 +358,7 @@ function App() {
               <motion.div
                 key={item.id}
                 whileTap={{ scale: 0.95 }}
-                className="flex flex-col items-center gap-4 min-w-[120px] p-6 rounded-[40px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-premium cursor-pointer group hover:border-primary/30 transition-all"
+                className="flex flex-col items-center gap-4 min-w-[120px] p-6 rounded-[40px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-floating cursor-pointer group hover:border-primary/30 transition-all"
                 onClick={() => {
                   if (item.id === 'mototaxi') setCurrentView('mototaxi_request');
                   else if (item.id === 'pet') setCurrentView('pet_shop');
@@ -390,7 +391,7 @@ function App() {
               <motion.div
                 key={i}
                 whileHover={{ y: -5 }}
-                className="relative h-[200px] rounded-[40px] overflow-hidden shadow-premium group cursor-pointer"
+                className="relative h-[200px] rounded-[40px] overflow-hidden shadow-floating group cursor-pointer"
               >
                 <img src={card.img} className="size-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent p-8 flex flex-col justify-center">
@@ -405,14 +406,14 @@ function App() {
 
         {/* Map Peek */}
         <section className="px-6 mt-6 pb-12">
-          <div className="h-40 w-full rounded-[48px] overflow-hidden relative shadow-premium group cursor-pointer border border-white/10 dark:border-white/5">
+          <div className="h-40 w-full rounded-[48px] overflow-hidden relative shadow-floating group cursor-pointer border border-white/10 dark:border-white/5">
             <div
               className="absolute inset-0 bg-slate-900 bg-cover bg-center transition-transform duration-[10s] group-hover:scale-110 opacity-70 group-hover:opacity-90"
               style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526778548025-fa2f459cd5ce?q=80&w=1000&auto=format&fit=crop')" }}
             ></div>
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
             <div className="absolute inset-0 flex flex-col items-center justify-center p-8 gap-4">
-              <div className="glass px-6 py-3 rounded-full flex items-center gap-3 border border-white/20 shadow-gold-glow animate-bounce">
+              <div className="glass px-6 py-3 rounded-full flex items-center gap-3 border border-white/20 shadow-soft animate-bounce">
                 <span className="size-2.5 rounded-full bg-primary shadow-[0_0_15px_#D4AF37]"></span>
                 <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">12 Concierges Ativos na Região</span>
               </div>
@@ -436,7 +437,7 @@ function App() {
           <div className="relative">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 border-4 border-primary shadow-gold-glow transition-transform"
+              className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 border-4 border-primary shadow-soft transition-transform"
               style={{ backgroundImage: `url('${userData.avatar}')` }}
             />
             <div className="absolute bottom-1 right-1 bg-primary text-slate-900 p-2.5 rounded-full border-2 border-white dark:border-background-dark flex items-center justify-center cursor-pointer shadow-lg active:scale-90 transition-all">
@@ -453,7 +454,7 @@ function App() {
                 { val: '124', label: 'Pedidos' },
                 { val: 'Lvl 8', label: 'Membro' },
               ].map((stat, i) => (
-                <div key={i} className="flex flex-col items-center px-4 py-3 bg-white dark:bg-surface-dark rounded-3xl shadow-premium border border-slate-100 dark:border-white/5 min-w-[80px]">
+                <div key={i} className="flex flex-col items-center px-4 py-3 bg-white dark:bg-surface-dark rounded-3xl shadow-floating border border-slate-100 dark:border-white/5 min-w-[80px]">
                   <span className="text-primary font-black text-lg leading-none mb-1">{stat.val}</span>
                   <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.1em]">{stat.label}</span>
                 </div>
@@ -479,9 +480,9 @@ function App() {
                 key={idx}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setCurrentView(item.view as ViewState)}
-                className="flex items-center gap-5 bg-white dark:bg-surface-dark p-5 rounded-[32px] hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-all cursor-pointer group shadow-premium border border-slate-100 dark:border-white/5"
+                className="flex items-center gap-5 bg-white dark:bg-surface-dark p-5 rounded-[32px] hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-all cursor-pointer group shadow-floating border border-slate-100 dark:border-white/5"
               >
-                <div className="flex items-center justify-center rounded-2xl bg-gold-50 dark:bg-gold-900/10 shrink-0 size-12 shadow-inner group-hover:bg-primary transition-colors">
+                <div className="flex items-center justify-center rounded-2xl bg-brand-50 dark:bg-brand-900/10 shrink-0 size-12 shadow-inner group-hover:bg-primary transition-colors">
                   <span className="material-symbols-outlined text-primary group-hover:text-slate-900 transition-colors">{item.icon}</span>
                 </div>
                 <p className="text-slate-900 dark:text-white text-base font-bold flex-1 font-display tracking-tight">{item.label}</p>
@@ -522,7 +523,7 @@ function App() {
       <div className="p-8 space-y-8">
         <div className="flex flex-col items-center">
           <div className="relative group">
-            <div className="size-32 rounded-full border-4 border-primary bg-center bg-cover shadow-gold-glow" style={{ backgroundImage: `url('${userData.avatar}')` }} />
+            <div className="size-32 rounded-full border-4 border-primary bg-center bg-cover shadow-soft" style={{ backgroundImage: `url('${userData.avatar}')` }} />
             <div className="absolute -bottom-1 -right-1 bg-primary text-slate-900 p-2.5 rounded-full border-2 border-white dark:border-background-dark shadow-xl active:scale-90 cursor-pointer">
               <span className="material-symbols-outlined text-sm font-bold">photo_camera</span>
             </div>
@@ -540,7 +541,7 @@ function App() {
               <input
                 type={field.type}
                 defaultValue={field.val}
-                className="w-full bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[24px] p-5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all shadow-premium"
+                className="w-full bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[24px] p-5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all shadow-floating"
               />
             </label>
           ))}
@@ -586,14 +587,14 @@ function App() {
           </div>
         </div>
 
-        <button className="w-full bg-white dark:bg-surface-dark border-2 border-dashed border-slate-200 dark:border-white/5 py-6 rounded-[32px] flex items-center justify-center gap-3 text-slate-500 dark:text-slate-400 font-black transition-all hover:border-primary/50 hover:text-primary hover:bg-gold-50/10 active:scale-[0.98] uppercase tracking-widest text-xs">
+        <button className="w-full bg-white dark:bg-surface-dark border-2 border-dashed border-slate-200 dark:border-white/5 py-6 rounded-[32px] flex items-center justify-center gap-3 text-slate-500 dark:text-slate-400 font-black transition-all hover:border-primary/50 hover:text-primary hover:bg-brand-50/10 active:scale-[0.98] uppercase tracking-widest text-xs">
           <span className="material-symbols-outlined text-xl">add_card</span>
           Novo Cartão de Crédito
         </button>
 
         <div className="pt-4 space-y-4">
           <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-2 font-display">Carteiras Digitais</h3>
-          <div className="flex items-center gap-5 bg-white dark:bg-surface-dark p-5 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium group cursor-pointer hover:border-primary/20 transition-all">
+          <div className="flex items-center gap-5 bg-white dark:bg-surface-dark p-5 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-floating group cursor-pointer hover:border-primary/20 transition-all">
             <div className="size-14 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-blue-500 text-3xl">pix</span>
             </div>
@@ -623,8 +624,8 @@ function App() {
             { id: 2, type: 'Trabalho', address: 'Av. Paulista, 1500 - Bela Vista', icon: 'corporate_fare' },
             { id: 3, type: 'Academia', address: 'Rua Augusta, 450 - Consolação', icon: 'fitness_center' },
           ].map((addr) => (
-            <div key={addr.id} className="flex items-center gap-5 bg-white dark:bg-surface-dark p-5 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium group transition-all hover:border-primary/30">
-              <div className="size-14 rounded-2xl bg-gold-50 dark:bg-gold-500/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-slate-900 transition-all">
+            <div key={addr.id} className="flex items-center gap-5 bg-white dark:bg-surface-dark p-5 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-floating group transition-all hover:border-primary/30">
+              <div className="size-14 rounded-2xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-slate-900 transition-all">
                 <span className="material-symbols-outlined text-2xl">{addr.icon}</span>
               </div>
               <div className="flex-1">
@@ -654,7 +655,7 @@ function App() {
         <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display mr-10 uppercase">Privilégios</h2>
       </div>
       <div className="p-8 space-y-8">
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-black p-8 rounded-[40px] shadow-premium relative overflow-hidden group">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-black p-8 rounded-[40px] shadow-floating relative overflow-hidden group">
           <div className="absolute -right-6 -top-6 size-48 bg-primary/20 rounded-full blur-[60px] group-hover:bg-primary/30 transition-all duration-700"></div>
           <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Seus Pontos Elite</p>
           <div className="flex items-baseline gap-2">
@@ -667,7 +668,7 @@ function App() {
               <span className="text-white font-black text-[10px] uppercase tracking-[0.2em] leading-none">Vip Elite Club</span>
             </div>
             <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-primary w-[75%] rounded-full shadow-gold-glow"></div>
+              <div className="h-full bg-primary w-[75%] rounded-full shadow-soft"></div>
             </div>
           </div>
         </div>
@@ -678,9 +679,9 @@ function App() {
             { code: 'VIPGOLD50', desc: '50% de Desconto em Deliveries', expiry: '30 Mar' },
             { code: 'FREETRANSPORT', desc: 'Viagem Grátis até R$ 20,00', expiry: '15 Abr' },
           ].map((coupon, i) => (
-            <div key={i} className="relative group overflow-hidden bg-white dark:bg-surface-dark p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium flex items-center justify-between before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:-translate-x-3 before:size-6 before:bg-background-light dark:before:bg-background-dark before:rounded-full after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2 after:translate-x-3 after:size-6 after:bg-background-light dark:after:bg-background-dark after:rounded-full">
+            <div key={i} className="relative group overflow-hidden bg-white dark:bg-surface-dark p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-floating flex items-center justify-between before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:-translate-x-3 before:size-6 before:bg-background-light dark:before:bg-background-dark before:rounded-full after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2 after:translate-x-3 after:size-6 after:bg-background-light dark:after:bg-background-dark after:rounded-full">
               <div className="flex items-center gap-5">
-                <div className="size-16 rounded-2xl bg-gold-50 dark:bg-gold-500/10 flex flex-col items-center justify-center border-r border-dashed border-gold-200 dark:border-white/10 pr-5 shrink-0">
+                <div className="size-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 flex flex-col items-center justify-center border-r border-dashed border-gold-200 dark:border-white/10 pr-5 shrink-0">
                   <span className="material-symbols-outlined text-primary text-2xl">auto_awesome</span>
                 </div>
                 <div>
@@ -707,7 +708,7 @@ function App() {
       </div>
       <div className="p-8 space-y-10">
         <div className="text-center space-y-3">
-          <div className="size-20 bg-primary/10 rounded-[30px] flex items-center justify-center mx-auto mb-4 border border-primary/20 shadow-gold-glow">
+          <div className="size-20 bg-primary/10 rounded-[30px] flex items-center justify-center mx-auto mb-4 border border-primary/20 shadow-soft">
             <span className="material-symbols-outlined text-4xl text-primary animate-pulse">support_agent</span>
           </div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Concierge 24/7</h1>
@@ -716,10 +717,10 @@ function App() {
 
         <div className="grid grid-cols-2 gap-5">
           {[
-            { label: 'Chat Online', icon: 'forum', color: 'bg-gold-50 dark:bg-gold-500/10' },
+            { label: 'Chat Online', icon: 'forum', color: 'bg-brand-50 dark:bg-brand-500/10' },
             { label: 'Ligar Agora', icon: 'phone_in_talk', color: 'bg-green-500/10' },
           ].map((item, i) => (
-            <div key={i} className="bg-white dark:bg-surface-dark p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium text-center flex flex-col items-center gap-4 active:scale-95 transition-all group hover:border-primary/20 cursor-pointer">
+            <div key={i} className="bg-white dark:bg-surface-dark p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-floating text-center flex flex-col items-center gap-4 active:scale-95 transition-all group hover:border-primary/20 cursor-pointer">
               <div className={`size-14 rounded-2xl ${item.color} flex items-center justify-center text-primary group-hover:scale-110 transition-transform`}>
                 <span className="material-symbols-outlined text-3xl">{item.icon}</span>
               </div>
@@ -736,7 +737,7 @@ function App() {
             { q: 'Segurança & Biometria', icon: 'fingerprint' },
             { q: 'Solicitar Parcerias Lux', icon: 'diamond' }
           ].map((item, i) => (
-            <div key={i} className="flex items-center justify-between bg-white dark:bg-surface-dark p-6 rounded-[28px] border border-slate-100 dark:border-white/5 shadow-premium group cursor-pointer transition-all hover:border-primary/30">
+            <div key={i} className="flex items-center justify-between bg-white dark:bg-surface-dark p-6 rounded-[28px] border border-slate-100 dark:border-white/5 shadow-floating group cursor-pointer transition-all hover:border-primary/30">
               <div className="flex items-center gap-4">
                 <span className="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-xl">{item.icon}</span>
                 <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">{item.q}</p>
@@ -760,7 +761,7 @@ function App() {
       <div className="p-8 space-y-8">
         <div className="space-y-6">
           {RECENT_ACTIVITY.map((activity) => (
-            <div key={activity.id} className="flex flex-col bg-white dark:bg-surface-dark p-6 rounded-[40px] border border-slate-100 dark:border-white/5 shadow-premium group transition-all hover:scale-[1.01]">
+            <div key={activity.id} className="flex flex-col bg-white dark:bg-surface-dark p-6 rounded-[40px] border border-slate-100 dark:border-white/5 shadow-floating group transition-all hover:scale-[1.01]">
               <div className="flex items-center gap-5 mb-6">
                 <div className={`size-16 rounded-2xl ${activity.bgColor} flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform`}>
                   <span className={`material-symbols-outlined text-3xl ${activity.iconColor} fill-1`}>{activity.icon}</span>
@@ -2654,9 +2655,9 @@ function App() {
           <div className="space-y-6">
             <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-2 font-display">Rastreamento Premium</h3>
             {ACTIVE_ORDERS.map((order) => (
-              <div key={order.id} className="relative group bg-white dark:bg-surface-dark p-6 rounded-[40px] border border-slate-100 dark:border-white/5 shadow-premium overflow-hidden transition-all hover:scale-[1.01]">
+              <div key={order.id} className="relative group bg-white dark:bg-surface-dark p-6 rounded-[40px] border border-slate-100 dark:border-white/5 shadow-floating overflow-hidden transition-all hover:scale-[1.01]">
                 <div className="flex items-center gap-5 mb-6">
-                  <div className="size-16 rounded-2xl bg-gold-50 dark:bg-gold-500/10 flex items-center justify-center shrink-0 border border-primary/10 transition-colors group-hover:bg-primary group-hover:text-slate-900">
+                  <div className="size-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center shrink-0 border border-primary/10 transition-colors group-hover:bg-primary group-hover:text-slate-900">
                     <span className="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">{order.icon}</span>
                   </div>
                   <div className="flex-1">
@@ -2682,7 +2683,7 @@ function App() {
                       initial={{ width: 0 }}
                       animate={{ width: `${order.progress}%` }}
                       transition={{ duration: 1.5, ease: 'easeOut' }}
-                      className="h-full bg-primary shadow-gold-glow relative"
+                      className="h-full bg-primary shadow-soft relative"
                     >
                       <div className="absolute inset-0 bg-white/20 animate-shimmer" />
                     </motion.div>
@@ -2704,7 +2705,7 @@ function App() {
             </div>
             <div className="space-y-4">
               {RECENT_ACTIVITY.map((activity) => (
-                <div key={activity.id} className="flex items-center gap-5 p-5 bg-white dark:bg-surface-dark rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium group cursor-pointer transition-all hover:border-primary/20">
+                <div key={activity.id} className="flex items-center gap-5 p-5 bg-white dark:bg-surface-dark rounded-[32px] border border-slate-100 dark:border-white/5 shadow-floating group cursor-pointer transition-all hover:border-primary/20">
                   <div className={`size-12 rounded-2xl ${activity.bgColor} flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform`}>
                     <span className={`material-symbols-outlined text-xl ${activity.iconColor}`}>{activity.icon}</span>
                   </div>
@@ -2731,7 +2732,7 @@ function App() {
             <span className="material-symbols-outlined text-primary group-focus-within:scale-125 transition-transform duration-500">search</span>
           </div>
           <input
-            className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-premium"
+            className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-floating"
             placeholder="O que você deseja hoje?"
             type="text"
             value={searchQuery}
@@ -2754,7 +2755,7 @@ function App() {
                 ].map((cat) => (
                   <button
                     key={cat.id}
-                    className={`flex flex-col p-7 rounded-[40px] ${cat.color} border border-transparent hover:border-current transition-all text-left space-y-5 shadow-premium group active:scale-95`}
+                    className={`flex flex-col p-7 rounded-[40px] ${cat.color} border border-transparent hover:border-current transition-all text-left space-y-5 shadow-floating group active:scale-95`}
                   >
                     <div className="size-14 rounded-2xl bg-white/20 dark:bg-black/20 backdrop-blur-md flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
                       <span className="material-symbols-outlined text-3xl group-hover:rotate-12 transition-transform">{cat.icon}</span>
@@ -2783,13 +2784,13 @@ function App() {
               {filteredServices.length > 0 ? filteredServices.map((service) => (
                 <div
                   key={service.id}
-                  className="flex items-center gap-5 p-6 bg-white dark:bg-surface-dark rounded-[40px] border border-slate-100 dark:border-white/5 shadow-premium active:scale-[0.98] transition-all cursor-pointer group"
+                  className="flex items-center gap-5 p-6 bg-white dark:bg-surface-dark rounded-[40px] border border-slate-100 dark:border-white/5 shadow-floating active:scale-[0.98] transition-all cursor-pointer group"
                   onClick={() => {
                     setActiveService(service);
                     setCurrentView('shipping_details');
                   }}
                 >
-                  <div className="size-16 bg-gold-50 dark:bg-gold-500/10 rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-slate-900 transition-all duration-500 shadow-inner shrink-0">
+                  <div className="size-16 bg-brand-50 dark:bg-brand-500/10 rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-slate-900 transition-all duration-500 shadow-inner shrink-0">
                     <span className="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">{service.icon}</span>
                   </div>
                   <div className="flex-1">
@@ -2894,11 +2895,11 @@ function App() {
       </div>
       <main className="flex-1 p-8 space-y-6 overflow-y-auto">
         {[
-          { title: 'Privilégio Ativo ⚡', text: '50% OFF em entregas gourmet hoje!', time: 'Agora', icon: 'bolt', color: 'bg-gold-50 dark:bg-gold-900/10 text-primary' },
+          { title: 'Privilégio Ativo ⚡', text: '50% OFF em entregas gourmet hoje!', time: 'Agora', icon: 'bolt', color: 'bg-brand-50 dark:bg-brand-900/10 text-primary' },
           { title: 'Concierge Finalizado', text: 'Sua viagem exclusiva com Ricardo foi concluída.', time: '2h atrás', icon: 'verified', color: 'bg-green-500/10 text-green-500' },
           { title: 'Elite Payment', text: 'PIX Instantâneo agora é o método preferencial.', time: 'Ontem', icon: 'payments', color: 'bg-blue-500/10 text-blue-500' },
         ].map((notif, idx) => (
-          <div key={idx} className="flex items-start gap-5 p-6 bg-white dark:bg-surface-dark rounded-[40px] border border-slate-100 dark:border-white/5 shadow-premium group transition-all hover:border-primary/20">
+          <div key={idx} className="flex items-start gap-5 p-6 bg-white dark:bg-surface-dark rounded-[40px] border border-slate-100 dark:border-white/5 shadow-floating group transition-all hover:border-primary/20">
             <div className={`size-14 rounded-2xl ${notif.color} flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform`}>
               <span className="material-symbols-outlined text-2xl fill-1">{notif.icon}</span>
             </div>

@@ -16,30 +16,31 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#D4AF37", // Premium Gold
-                        "gold": {
-                            "50": "#fbf8ef",
-                            "100": "#f5eed4",
-                            "200": "#eadba7",
-                            "300": "#dabf70",
-                            "400": "#c5a037",
-                            "500": "#d4af37",
-                            "600": "#b38a29",
-                            "700": "#8f6623",
-                            "800": "#755321",
-                            "900": "#63461f",
+                        "primary": "#ea1d2c", // iFood Red
+                        "primary-hover": "#d21825",
+                        "brand": {
+                            "50": "#fcf3f3",
+                            "100": "#f8e3e4",
+                            "200": "#f2cbcd",
+                            "300": "#eaabaf",
+                            "400": "#e07d83",
+                            "500": "#d05159",
+                            "600": "#ba3740",
+                            "700": "#9e272f",
+                            "800": "#83242b",
+                            "900": "#6d2228",
                         },
-                        "background-light": "#FDFDFD",
-                        "background-dark": "#0A0A0A",
-                        "surface-dark": "#161616",
+                        "background-light": "#F7F7F7",
+                        "background-dark": "#121212",
+                        "surface-dark": "#1C1C1C",
                         "surface-light": "#FFFFFF",
                     },
                     fontFamily: {
                         "display": ["Plus Jakarta Sans", "sans-serif"]
                     },
                     boxShadow: {
-                        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.3)',
-                        'gold-glow': '0 0 20px rgba(212, 175, 55, 0.2)',
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'floating': '0 10px 40px -10px rgba(0, 0, 0, 0.08)',
                     }
                 },
             },
@@ -52,6 +53,7 @@
             padding: 0;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            background-color: #F7F7F7;
         }
 
         .material-symbols-outlined {
@@ -59,28 +61,15 @@
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .dark .glass {
-            background: rgba(22, 22, 22, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .premium-border {
-            border: 1px solid transparent;
-            background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)), linear-gradient(45deg, #D4AF37, #F5EED4);
-            background-origin: border-box;
-            background-clip: padding-box, border-box;
-        }
-
-        .text-gradient {
-            background: linear-gradient(45deg, #D4AF37, #F5EED4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            background: rgba(28, 28, 28, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         ::-webkit-scrollbar {
@@ -88,8 +77,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #D4AF37;
+            background: #d1d5db;
             border-radius: 10px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #374151;
         }
     </style>
 </head>
