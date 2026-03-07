@@ -41,6 +41,31 @@ function App() {
   const [paymentMethod, setPaymentMethod] = useState('money');
   const [destinationSearchVal, setDestinationSearchVal] = useState('');
 
+  // Auth States
+  const [email, setEmail] = useState('cliente@exemplo.com');
+  const [password, setPassword] = useState('senha123');
+  const [authError, setAuthError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [availableDrivers, setAvailableDrivers] = useState<any[]>([]);
+
+  // Listen to realtime drivers
+  useEffect(() => {
+    supabase.from('drivers_delivery').select('*').eq('is_online', true).then(({ data }) => {
+      if (data) setAvailableDrivers(data);
+    });
+
+    const channel = supabase.channel('drivers_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'drivers_delivery' }, () => {
+        supabase.from('drivers_delivery').select('*').eq('is_online', true).then(({ data }) => {
+          if (data) setAvailableDrivers(data);
+        });
+      }).subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   // User Profile Data (Mock)
   const [userData] = useState({
     name: 'Ricardo Oliveira',
@@ -170,6 +195,42 @@ function App() {
     </div>
   );
 
+  const handleLogin = async () => {
+    setIsLoading(true);
+    setAuthError('');
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          const { error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: { name: 'Novo Cliente', role: 'user' }
+            }
+          });
+          if (signUpError) {
+            setAuthError(signUpError.message);
+          } else {
+            setCurrentView('app');
+          }
+        } else {
+          setAuthError(error.message);
+        }
+      } else {
+        setCurrentView('app');
+      }
+    } catch (err: any) {
+      setAuthError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderLogin = () => (
     <div className="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden font-display">
       <div className="flex-1 flex flex-col max-w-md mx-auto w-full relative z-10">
@@ -201,9 +262,10 @@ function App() {
                 </div>
                 <input
                   className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-floating"
-                  placeholder="ricardo.oliveira@email.com"
+                  placeholder="cliente@exemplo.com"
                   type="email"
-                  defaultValue="ricardo.oliveira@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
@@ -221,7 +283,8 @@ function App() {
                   className="block w-full pl-14 pr-16 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-floating"
                   placeholder="••••••••"
                   type={showPassword ? "text" : "password"}
-                  defaultValue="password123"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-primary transition-colors p-2"
@@ -232,12 +295,14 @@ function App() {
               </div>
             </div>
 
+            {authError && <p className="text-red-500 font-bold text-center text-xs bg-red-50 p-3 rounded-2xl border border-red-100">{authError}</p>}
             <button
-              onClick={() => setCurrentView('app')}
-              className="w-full bg-primary text-slate-900 font-black py-6 rounded-[32px] text-base uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 transition-all hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-3 border-b-4 border-slate-900/10"
+              onClick={handleLogin}
+              disabled={isLoading}
+              className="w-full bg-primary text-white font-black py-6 rounded-[32px] text-base uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 transition-all hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
             >
-              Autenticar
-              <span className="material-symbols-outlined">verified_user</span>
+              {isLoading ? 'Autenticando...' : 'Autenticar'}
+              <span className="material-symbols-outlined">{isLoading ? 'hourglass_empty' : 'verified_user'}</span>
             </button>
           </div>
 
@@ -414,8 +479,8 @@ function App() {
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
             <div className="absolute inset-0 flex flex-col items-center justify-center p-8 gap-4">
               <div className="glass px-6 py-3 rounded-full flex items-center gap-3 border border-white/20 shadow-soft animate-bounce">
-                <span className="size-2.5 rounded-full bg-primary shadow-[0_0_15px_#D4AF37]"></span>
-                <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">12 Concierges Ativos na Região</span>
+                <span className="size-2.5 rounded-full bg-primary shadow-[0_0_15px_#ea1d2c]"></span>
+                <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">{availableDrivers.length} Entregadores Ativos</span>
               </div>
               <h4 className="text-white text-lg font-black uppercase tracking-[0.1em] text-center">Abrir Mapa em Tempo Real</h4>
             </div>
