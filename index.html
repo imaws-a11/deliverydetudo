@@ -1,26 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Multi-Service Delivery App</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#ffd900",
-                        "background-light": "#f8f8f5",
-                        "background-dark": "#23200f",
+                        "primary": "#D4AF37", // Premium Gold
+                        "gold": {
+                            "50": "#fbf8ef",
+                            "100": "#f5eed4",
+                            "200": "#eadba7",
+                            "300": "#dabf70",
+                            "400": "#c5a037",
+                            "500": "#d4af37",
+                            "600": "#b38a29",
+                            "700": "#8f6623",
+                            "800": "#755321",
+                            "900": "#63461f",
+                        },
+                        "background-light": "#FDFDFD",
+                        "background-dark": "#0A0A0A",
+                        "surface-dark": "#161616",
+                        "surface-light": "#FFFFFF",
                     },
                     fontFamily: {
-                        "display": ["Plus Jakarta Sans"]
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
                     },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    boxShadow: {
+                        'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.3)',
+                        'gold-glow': '0 0 20px rgba(212, 175, 55, 0.2)',
+                    }
                 },
             },
         }
@@ -30,14 +50,53 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
+
         .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark .glass {
+            background: rgba(22, 22, 22, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .premium-border {
+            border: 1px solid transparent;
+            background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)), linear-gradient(45deg, #D4AF37, #F5EED4);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+
+        .text-gradient {
+            background: linear-gradient(45deg, #D4AF37, #F5EED4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 10px;
         }
     </style>
 </head>
+
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
 </body>
+
 </html>

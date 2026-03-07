@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useMemo, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 // Mock Data
 const SERVICES = [
@@ -25,7 +25,8 @@ type ViewState =
   | 'mototaxi_request' | 'mototaxi_category' | 'searching_driver' | 'driver_found' | 'trip_in_progress' | 'trip_completed' | 'trip_rating'
   | 'shipping_details' | 'shipping_address' | 'shipping_vehicle' | 'shipping_payment' | 'shipping_processing' | 'shipping_error'
   | 'searching_courier' | 'on_the_way_to_pickup' | 'on_the_way_to_destination' | 'delivery_completed'
-  | 'driver_confirmation' | 'pet_shop' | 'food_categories' | 'notifications';
+  | 'driver_confirmation' | 'pet_shop' | 'food_categories' | 'notifications' | 'profile'
+  | 'my_data' | 'payment_methods' | 'saved_addresses' | 'coupons' | 'order_history' | 'support';
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewState>('onboarding');
@@ -38,6 +39,16 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState({ id: 'comum', label: 'Mototáxi Comum', price: 'R$ 12,00' });
   const [paymentMethod, setPaymentMethod] = useState('money');
   const [destinationSearchVal, setDestinationSearchVal] = useState('');
+
+  // User Profile Data (Mock)
+  const [userData] = useState({
+    name: 'Ricardo Oliveira',
+    email: 'ricardo.oliveira@email.com',
+    phone: '(11) 98765-4321',
+    rating: 4.9,
+    ordersCount: 124,
+    avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC1kK06avEJV3GlHT9jYD09fWkHVZdK7zkHeHYogAjmBCqXwyB_Ygnp3VZ9juLgAqaSvGhvLzQon1d7E9tLz_5kVT7CIf_s7qK74PPyuFi4HGrlcx85SrJRMc3UvL-oBQ1GoxCcS-T0sYZ-XkHgn_gvv1HOP66lHmV8hDOtsFJkcWIz1OCMuAhRW6lBogvrB61Ss0xec2nTU124JXBhsR9bdk4ClV3OzNeDDbn4Z1bMcDbGnPQ-fG-Vr9-PzNYb-NYt0MQiw1TsAYN7'
+  });
 
   // Shipping Flow State
   const [activeService, setActiveService] = useState<any>(null);
@@ -75,458 +86,705 @@ function App() {
 
   const renderOnboarding = () => (
     <div className="relative flex h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark font-display">
-      <div className="flex-1 flex flex-col max-w-md mx-auto w-full">
-        {/* Hero Illustration Section */}
-        <div className="w-full pt-8 px-4">
-          <div className="relative">
+      <div className="flex-1 flex flex-col max-w-md mx-auto w-full relative z-10">
+        {/* Cinematic Hero Section */}
+        <div className="w-full pt-12 px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1 }}
+            className="relative"
+          >
             <div
-              className="w-full bg-primary/10 dark:bg-primary/5 bg-center bg-no-repeat bg-contain flex flex-col justify-end overflow-hidden rounded-3xl min-h-[400px] relative z-10 shadow-inner"
-              style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCvv17iTA97MO5UL0aTkrkrr96hmtrKbZjk9saKHn-0xQFx4SVJfzOJQ_u8MdBo-A12J6elggJPh5jQxWxYBDl1uT2422uJw-aPMoGrYIKlN9YD4uVeuIlGMdyzUAJ2Q1djKUDF_0HcNLY72gxXyIB9Qa6YfqPyO2hr85Oambfk3nu8iyMcbZIzS1XEAtNDb9gcG2Uf2D3x7UhCbDjD8H7HB5CyhQvqMA27hnMizc_7NA2I70IjZlx0tCUbsCgW7JcEzbhmi8jmQpfe')" }}
+              className="w-full aspect-[4/5] bg-slate-900 overflow-hidden rounded-[50px] shadow-2xl relative border border-white/10 dark:border-white/5"
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-background-light via-transparent to-transparent dark:from-background-dark"></div>
+              <img
+                src="https://images.unsplash.com/photo-1549463599-24794790949e?q=80&w=1000&auto=format&fit=crop"
+                className="size-full object-cover scale-110 animate-slow-zoom"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent"></div>
+              <div className="absolute bottom-10 left-10 right-10">
+                <div className="glass px-4 py-2 rounded-full w-fit mb-4 border border-white/20">
+                  <span className="text-[10px] font-black text-white uppercase tracking-[0.4em]">Elite Experience</span>
+                </div>
+                <h2 className="text-white text-4xl font-black tracking-tight leading-none italic uppercase">Tudo na<br /><span className="text-primary tracking-widest text-2xl not-italic">VELOCIDADE LUX</span></h2>
+              </div>
             </div>
-          </div>
+            {/* Floating Widget */}
+            <div className="absolute -bottom-6 -right-4 glass p-4 rounded-3xl shadow-gold-glow border border-white/20 animate-bounce cursor-default">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-primary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-slate-900 font-bold">bolt</span>
+                </div>
+                <div>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
+                  <p className="text-sm font-black text-slate-900 dark:text-white leading-none tracking-tight">VIP Ativo</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
 
-        {/* Content Section */}
-        <div className="flex flex-col flex-1 justify-between px-6 pb-12 pt-8">
-          <div>
-            <h1 className="text-slate-900 dark:text-slate-100 tracking-tight text-[36px] font-extrabold leading-tight text-center pb-4 font-display">
-              Tudo o que você precisa, <span className="text-primary">onde você estiver.</span>
+        {/* Action Content */}
+        <div className="flex flex-col flex-1 justify-between px-8 pb-16 pt-12">
+          <div className="space-y-4">
+            <h1 className="text-slate-900 dark:text-slate-100 tracking-tight text-[40px] font-black leading-tight text-center font-display italic">
+              O seu tempo é <span className="text-primary not-italic">sagrado.</span>
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-lg font-medium leading-relaxed text-center px-2 font-display">
-              Peça comida, mercado, farmácia e muito mais sem sair de casa. A entrega mais rápida da cidade está a um toque.
+            <p className="text-slate-500 dark:text-slate-400 text-lg font-bold leading-relaxed text-center px-4 font-display opacity-80 uppercase tracking-tighter">
+              A elegância da conveniência elevada ao próximo patamar.
             </p>
           </div>
 
-          <div className="flex flex-col gap-6">
-            {/* Pagination Indicators */}
-            <div className="flex w-full flex-row items-center justify-center gap-2">
-              <div className="h-2 w-8 rounded-full bg-primary"></div>
-              <div className="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-              <div className="h-2 w-2 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+          <div className="flex flex-col gap-8">
+            <div className="flex w-full flex-row items-center justify-center gap-3">
+              <div className="h-1.5 w-12 rounded-full bg-primary shadow-gold-glow"></div>
+              <div className="h-1.5 w-1.5 rounded-full bg-slate-200 dark:bg-slate-800"></div>
+              <div className="h-1.5 w-1.5 rounded-full bg-slate-200 dark:bg-slate-800"></div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4">
               <button
                 onClick={() => setCurrentView('login')}
-                className="flex min-w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-16 px-5 bg-primary text-slate-900 text-lg font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all font-display"
+                className="flex w-full cursor-pointer items-center justify-center rounded-3xl h-18 py-5 bg-primary text-slate-900 text-lg font-black shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all font-display uppercase tracking-[0.2em] border-b-4 border-slate-900/10"
               >
-                <span className="truncate">Começar Agora</span>
-                <span className="material-symbols-outlined ml-2 text-xl">arrow_forward</span>
+                Explorar Lux
               </button>
               <button
                 onClick={() => setCurrentView('login')}
-                className="flex min-w-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl h-14 px-5 bg-transparent border-2 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-base font-semibold font-display active:bg-slate-50 dark:active:bg-slate-800 transition-colors"
+                className="flex w-full cursor-pointer items-center justify-center rounded-3xl h-16 py-4 glass border border-slate-200 dark:border-white/5 text-slate-900 dark:text-slate-100 text-sm font-black font-display uppercase tracking-[0.3em] active:bg-slate-50 dark:active:bg-slate-800 transition-all opacity-80 hover:opacity-100"
               >
-                <span className="truncate">Já tenho uma conta</span>
+                Acessar Minha Conta
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Decorative Elements */}
-      <div className="fixed top-0 left-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 -z-10"></div>
-      <div className="fixed bottom-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 -z-10"></div>
+      {/* Background Ambience */}
+      <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
+        <div className="absolute top-0 right-0 size-[500px] bg-primary/10 rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 left-0 size-[400px] bg-primary/5 rounded-full blur-[100px] -translate-x-1/2 translate-y-1/2"></div>
+      </div>
     </div>
   );
 
   const renderLogin = () => (
-    <div className="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden font-display">
-      <div className="flex-1 flex flex-col max-w-md mx-auto w-full">
-        {/* Top App Bar */}
-        <div className="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between">
-          <div
-            className="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-start cursor-pointer active:scale-90 transition-transform"
+    <div className="relative flex h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-hidden font-display">
+      <div className="flex-1 flex flex-col max-w-md mx-auto w-full relative z-10">
+        {/* Header */}
+        <div className="flex items-center p-8 justify-between">
+          <button
+            className="size-12 rounded-2xl glass border border-slate-100 dark:border-white/5 flex items-center justify-center text-slate-900 dark:text-white transition-all active:scale-90"
             onClick={() => setCurrentView('onboarding')}
           >
             <span className="material-symbols-outlined">arrow_back</span>
-          </div>
-          <h2 className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Bem-vindo de volta</h2>
-        </div>
-
-        {/* Hero Illustration */}
-        <div className="px-4 py-3">
-          <div
-            className="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-slate-200 dark:bg-slate-800 rounded-2xl min-h-[240px] shadow-lg"
-            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBr8wZYr3WlQfqAe8DOvPVYW8yDdMBD67anE78aHoEhZCQ0GMvZ0GZKHmlXO8jiTGUbeLl1SoRCjC9uXJfQb1ntrIS2Kj5wWYXGF4VJWS6q-4n3Fsqk-XfBfiVjGc4pwoAbthD7Dz7nt5COse7c6EaoPwwbBz6qSRiw_EL6Yd_8fsA4t6LbdqLyJSq0IKQYHx92zwoiXtsUhzYvZckARhMe-xOJE46fc5R1qFX6JQSZ9d_ID-UPhnMSl0xxxUtnG2FJdC3_u5Qsk2Q3')" }}
-          >
+          </button>
+          <div className="glass px-5 py-2.5 rounded-2xl border border-white/20">
+            <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Acesso Seguro</span>
           </div>
         </div>
 
-        {/* Title Section */}
-        <div className="px-6 pt-8 pb-2 text-center">
-          <h1 className="text-slate-900 dark:text-slate-100 tracking-tight text-[32px] font-bold leading-tight font-display">Pronto para sua próxima entrega?</h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2 text-base font-display">Faça login para começar a acompanhar seus pedidos</p>
-        </div>
+        <main className="flex-1 px-8 pt-6 space-y-12">
+          <div className="text-center space-y-4">
+            <h1 className="text-slate-900 dark:text-white text-[44px] font-black tracking-tight leading-none uppercase italic">IDENTIFIQUE-<br /><span className="text-primary not-italic tracking-[0.1em]">SE</span></h1>
+            <p className="text-slate-500 font-bold uppercase tracking-widest text-xs opacity-60">Entre para continuar sua jornada elite</p>
+          </div>
 
-        {/* Login Form */}
-        <div className="flex flex-col gap-4 px-6 py-4 w-full">
-          <label className="flex flex-col w-full text-left">
-            <p className="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal pb-2 font-display">E-mail</p>
-            <input
-              className="flex w-full rounded-lg text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-2 focus:ring-primary border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 h-14 placeholder:text-slate-400 px-4 text-base transition-all font-display"
-              placeholder="ricardo.oliveira@email.com"
-              type="email"
-              defaultValue="ricardo.oliveira@email.com"
-            />
-          </label>
-          <label className="flex flex-col w-full text-left">
-            <p className="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal pb-2 font-display">Senha</p>
-            <div className="relative flex w-full items-stretch">
-              <input
-                className="flex w-full rounded-lg text-slate-900 dark:text-slate-100 focus:outline-0 focus:ring-2 focus:ring-primary border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 h-14 placeholder:text-slate-400 px-4 text-base transition-all font-display"
-                placeholder="••••••••"
-                type={showPassword ? "text" : "password"}
-                defaultValue="password123"
-              />
-              <div
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer p-1"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                <span className="material-symbols-outlined text-xl">{showPassword ? 'visibility_off' : 'visibility'}</span>
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] ml-4">E-mail Corporativo</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                  <span className="material-symbols-outlined text-primary text-xl">alternate_email</span>
+                </div>
+                <input
+                  className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-premium"
+                  placeholder="ricardo.oliveira@email.com"
+                  type="email"
+                  defaultValue="ricardo.oliveira@email.com"
+                />
               </div>
             </div>
-          </label>
-          <div className="flex justify-end">
-            <button className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-primary active:scale-95 transition-transform font-display">Esqueceu a senha?</button>
+
+            <div className="space-y-3">
+              <div className="flex justify-between items-center px-4">
+                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Senha Secreta</label>
+                <button className="text-[10px] font-black text-primary uppercase tracking-widest border-b border-primary/20 hover:border-primary transition-all">Esqueceu?</button>
+              </div>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                  <span className="material-symbols-outlined text-primary text-xl">lock</span>
+                </div>
+                <input
+                  className="block w-full pl-14 pr-16 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-premium"
+                  placeholder="••••••••"
+                  type={showPassword ? "text" : "password"}
+                  defaultValue="password123"
+                />
+                <button
+                  className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-primary transition-colors p-2"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <span className="material-symbols-outlined">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setCurrentView('app')}
+              className="w-full bg-primary text-slate-900 font-black py-6 rounded-[32px] text-base uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 transition-all hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-3 border-b-4 border-slate-900/10"
+            >
+              Autenticar
+              <span className="material-symbols-outlined">verified_user</span>
+            </button>
           </div>
-          <button
-            onClick={() => setCurrentView('app')}
-            className="flex w-full cursor-pointer items-center justify-center rounded-xl h-14 bg-primary text-slate-900 text-base font-bold leading-normal tracking-[0.015em] transition-all hover:scale-[1.01] active:scale-[0.98] shadow-lg shadow-primary/20 font-display"
-          >
-            Entrar
-          </button>
-        </div>
 
-        {/* Divider */}
-        <div className="flex items-center px-6 py-4 w-full">
-          <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
-          <span className="px-4 text-sm text-slate-400 font-medium font-display">ou continue com</span>
-          <div className="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
-        </div>
+          <div className="space-y-8">
+            <div className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-slate-100 dark:bg-white/5"></div>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Acesso Rápido</span>
+              <div className="h-px flex-1 bg-slate-100 dark:bg-white/5"></div>
+            </div>
 
-        {/* Social Login Buttons */}
-        <div className="flex flex-col gap-3 px-6 pb-6 w-full">
-          <button className="flex w-full items-center justify-center gap-3 rounded-xl h-14 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-base font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-[0.98] transition-all shadow-sm font-display">
-            <svg fill="none" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"></path>
-            </svg>
-            Google
-          </button>
-          <button className="flex w-full items-center justify-center gap-3 rounded-xl h-14 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-base font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-[0.98] transition-all shadow-sm font-display">
-            <svg fill="currentColor" height="20" viewBox="0 0 24 24" width="20">
-              <path d="M17.05 20.28c-.96.95-2.24 1.48-3.55 1.48-1.54 0-2.88-.47-3.95-1.1-1.07-.63-2.06-1.57-2.92-2.76C5.03 15.65 4 13.56 4 11.45c0-2.11 1.03-4.2 2.63-5.5 1.6-1.31 3.61-1.8 5.61-1.42.45.08.88.24 1.28.47 1.11.63 1.94 1.35 2.53 1.35.59 0 1.42-.72 2.53-1.35.4-.23.83-.39 1.28-.47 2-.38 4.01.11 5.61 1.42 1.6 1.3 2.63 3.39 2.63 5.5 0 2.11-1.03 4.2-2.63 6.41-.86 1.19-1.85 2.13-2.92 2.76-1.07.63-2.41 1.1-3.95 1.1-1.31 0-2.59-.53-3.55-1.48L17.05 20.28zM14.5 1.5c.08 1.15-.36 2.29-1.22 3.14-.86.85-2.03 1.32-3.21 1.25-.08-1.15.36-2.29 1.22-3.14.86-.85 2.03-1.32 3.21-1.25z"></path>
-            </svg>
-            Apple
-          </button>
-        </div>
+            <div className="grid grid-cols-2 gap-4">
+              <button className="flex items-center justify-center gap-3 glass py-5 rounded-[30px] border border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-all active:scale-[0.95] text-[10px] font-black uppercase tracking-widest">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png" className="size-4" />
+                Google
+              </button>
+              <button className="flex items-center justify-center gap-3 glass py-5 rounded-[30px] border border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-all active:scale-[0.95] text-[10px] font-black uppercase tracking-widest">
+                <span className="material-symbols-outlined text-xl">apple</span>
+                Apple ID
+              </button>
+            </div>
+          </div>
+        </main>
 
-        {/* Sign Up CTA */}
-        <div className="mt-auto pb-10 px-6 text-center">
-          <p className="text-slate-600 dark:text-slate-400 font-display">
-            Não tem uma conta? <button className="text-slate-900 dark:text-slate-100 font-bold hover:underline ml-1 active:scale-95 transition-transform">Criar uma conta</button>
+        <footer className="p-10 text-center">
+          <p className="text-slate-400 font-bold uppercase tracking-tighter text-sm">
+            Novo por aqui? <button className="text-primary font-black hover:underline ml-1">Criar Convite Lux</button>
           </p>
-        </div>
+        </footer>
       </div>
+
+      {/* Decorative */}
+      <div className="absolute -top-20 -left-20 size-80 bg-primary/10 rounded-full blur-[100px] -z-0"></div>
     </div>
   );
 
 
 
   const renderHome = () => (
-    <>
-      <header className="p-4 space-y-4 sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-30 border-b border-slate-100 dark:border-slate-800">
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-32 animate-in fade-in duration-700">
+      <header className="p-6 space-y-6 sticky top-0 glass z-40 border-b border-white/10 dark:border-white/5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-slate-900 font-bold shadow-sm cursor-pointer active:scale-90 transition-transform bg-center bg-cover border-2 border-primary"
-              style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC1kK06avEJV3GlHT9jYD09fWkHVZdK7zkHeHYogAjmBCqXwyB_Ygnp3VZ9juLgAqaSvGhvLzQon1d7E9tLz_5kVT7CIf_s7qK74PPyuFi4HGrlcx85SrJRMc3UvL-oBQ1GoxCcS-T0sYZ-XkHgn_gvv1HOP66lHmV8hDOtsFJkcWIz1OCMuAhRW6lBogvrB61Ss0xec2nTU124JXBhsR9bdk4ClV3OzNeDDbn4Z1bMcDbGnPQ-fG-Vr9-PzNYb-NYt0MQiw1TsAYN7')" }}
+              className="size-12 rounded-2xl bg-primary flex items-center justify-center text-slate-900 font-bold shadow-gold-glow cursor-pointer active:scale-90 transition-all bg-center bg-cover border border-white/20"
+              style={{ backgroundImage: `url('${userData.avatar}')` }}
               onClick={() => setActiveTab('profile')}
-            >
-            </div>
+            />
             <div className="cursor-pointer group" onClick={() => setCurrentView('mototaxi_request')}>
-              <p className="text-xs text-left text-slate-500 dark:text-slate-400 font-medium font-display">Entregar em</p>
-              <div className="flex items-center gap-1 font-display">
-                <span className="material-symbols-outlined text-primary text-sm">location_on</span>
-                <span className="text-sm font-bold truncate max-w-[150px] group-hover:text-primary transition-colors">{selectedAddress}</span>
+              <p className="text-[10px] text-left text-slate-400 font-black uppercase tracking-[0.3em] leading-none mb-1">Entregar em</p>
+              <div className="flex items-center gap-1.5 font-display">
+                <span className="material-symbols-outlined text-primary text-sm group-hover:scale-110 transition-transform">location_on</span>
+                <span className="text-sm font-black text-slate-900 dark:text-white truncate max-w-[140px] tracking-tight">{selectedAddress}</span>
                 <span className="material-symbols-outlined text-slate-400 text-sm group-hover:rotate-180 transition-transform">keyboard_arrow_down</span>
               </div>
             </div>
           </div>
           <button
-            className="w-10 h-10 rounded-full border border-slate-100 dark:border-slate-800 flex items-center justify-center relative active:scale-90 transition-transform"
+            className="size-12 rounded-2xl glass border border-white/10 dark:border-white/5 flex items-center justify-center relative active:scale-90 transition-all shadow-premium"
             onClick={() => {
               setNotifications(0);
               setCurrentView('notifications');
             }}
           >
-            <span className="material-symbols-outlined text-slate-600 dark:text-slate-100">notifications</span>
+            <span className="material-symbols-outlined text-slate-600 dark:text-slate-100 text-2xl">notifications</span>
             {notifications > 0 && (
-              <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+              <span className="absolute top-3.5 right-3.5 size-2.5 bg-red-500 rounded-full border-2 border-white dark:border-background-dark shadow-[0_0_8px_#ef4444]"></span>
             )}
           </button>
         </div>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <span className="material-symbols-outlined text-slate-400">search</span>
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+            <span className="material-symbols-outlined text-primary group-focus-within:scale-125 transition-transform duration-500">search</span>
           </div>
           <input
-            className="block w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/50 placeholder:text-slate-400 transition-all focus:bg-white dark:focus:bg-slate-700 font-display"
-            placeholder="Buscar comida, pacotes ou viagens"
+            className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-premium"
+            placeholder="O que você deseja hoje?"
             type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setActiveTab('search')}
           />
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-24">
-        {/* Promo Banner */}
-        <div className="px-4 py-4">
-          <div className="relative w-full h-40 rounded-2xl overflow-hidden bg-primary group transition-transform active:scale-95 cursor-pointer shadow-lg">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent z-10 flex flex-col justify-center p-6">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-800/60 mb-1 text-left font-display">OFERTA EXCLUSIVA</span>
-              <h3 className="text-2xl font-extrabold text-slate-900 leading-tight mb-2 text-left font-display">50% de DESCONTO<br />na primeira entrega</h3>
-              <button className="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg w-fit font-display shadow-lg active:scale-90">Pedir Agora</button>
+      <main className="flex-1 overflow-y-auto pt-4">
+        {/* Elite Banner */}
+        <section className="px-6 py-4">
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            className="relative w-full h-[220px] rounded-[48px] overflow-hidden group cursor-pointer shadow-premium"
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10 p-10 flex flex-col justify-end">
+              <span className="text-primary text-[10px] font-black uppercase tracking-[0.4em] mb-3">Programa Fidelidade Lux</span>
+              <h3 className="text-3xl font-black text-white leading-none tracking-tight mb-4 italic">PRIVILÉGIOS<br /><span className="text-primary tracking-[0.1em]">EXCLUSIVOS</span></h3>
+              <p className="text-white/60 text-xs font-bold uppercase tracking-widest mb-2">Primeira entrega grátis</p>
             </div>
             <div
-              className="absolute right-0 top-0 h-full w-1/2 bg-cover bg-center"
-              style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDZB0CdGjfU8bpvW6uolaEBu_Mv5k_x5dq7R7YXXWaxHFTcnnGO4yX1aTFm2enEa2HgxastRZdHYrJDrZIk9bmHcyNhZTy5PtkfMp0npTOJGYhV-W5xu8hmv8di_KbuAQJ1SvtGs6i-dc9mtNTyirG0H0xToGQ6Zne-8AQoarR87pNzGt_nGejvWUwpWjyEzsnBISgv8iegRwVlbZtmpsVSKCZA75L92c2EWTnCN1TGQRzbhtoyrmPttI8BzqE5StCd3gBv62NgiB1H')" }}
-            >
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] group-hover:scale-110"
+              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540959733332-e94e270b4d48?q=80&w=1000&auto=format&fit=crop')" }}
+            />
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+          </motion.div>
+        </section>
+
+        {/* Categories Carousel */}
+        <section className="py-8">
+          <div className="px-8 flex justify-between items-end mb-6">
+            <h2 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] font-display">Categorias High-End</h2>
+            <button className="text-[10px] font-black text-primary uppercase border-b border-primary/30 pb-0.5 tracking-widest">Ver Todas</button>
+          </div>
+          <div className="flex gap-4 overflow-x-auto px-6 pb-4 scrollbar-hide">
+            {[
+              { id: 'mototaxi', icon: 'moped', label: 'Concierge Viagem', color: 'bg-primary/20' },
+              { id: 'entrega', icon: 'restaurant', label: 'Gourmet Deli', color: 'bg-red-500/10 text-red-600' },
+              { id: 'expressas', icon: 'bolt', label: 'Elite Express', color: 'bg-yellow-500/10 text-yellow-600' },
+              { id: 'mercado', icon: 'shopping_cart', label: 'Mercado Lux', color: 'bg-green-500/10 text-green-600' },
+              { id: 'pet', icon: 'pets', label: 'Pet Gourmet', color: 'bg-blue-500/10 text-blue-600' },
+            ].map((item) => (
+              <motion.div
+                key={item.id}
+                whileTap={{ scale: 0.95 }}
+                className="flex flex-col items-center gap-4 min-w-[120px] p-6 rounded-[40px] bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 shadow-premium cursor-pointer group hover:border-primary/30 transition-all"
+                onClick={() => {
+                  if (item.id === 'mototaxi') setCurrentView('mototaxi_request');
+                  else if (item.id === 'pet') setCurrentView('pet_shop');
+                  else if (item.id === 'entrega' || item.id === 'mercado') {
+                    setActiveService(item);
+                    setCurrentView('food_categories');
+                  } else {
+                    setActiveService(item);
+                    setCurrentView('shipping_details');
+                  }
+                }}
+              >
+                <div className={`size-16 rounded-2xl ${item.color.includes('primary') ? item.color : item.color.split(' ')[0]} flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform`}>
+                  <span className={`material-symbols-outlined text-3xl ${item.color.includes('text') ? item.color.split(' ')[1] : 'text-primary'}`}>{item.icon}</span>
+                </div>
+                <span className="text-[10px] font-black text-center uppercase tracking-widest leading-tight text-slate-900 dark:text-white group-hover:text-primary transition-colors">{item.label}</span>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Featured Selection */}
+        <section className="px-6 py-6">
+          <h2 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-2 mb-6 font-display">Seleção Curada Lux</h2>
+          <div className="grid grid-cols-1 gap-6">
+            {[
+              { title: 'Alta Gastronomia', subtitle: 'Os melhores chefs do bairro', img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=800&auto=format&fit=crop', tag: 'Top Rated' },
+              { title: 'Vinhos & Destilados', subtitle: 'Adega exclusiva 24h', img: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=800&auto=format&fit=crop', tag: 'Curadoria' },
+            ].map((card, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ y: -5 }}
+                className="relative h-[200px] rounded-[40px] overflow-hidden shadow-premium group cursor-pointer"
+              >
+                <img src={card.img} className="size-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent p-8 flex flex-col justify-center">
+                  <span className="bg-primary px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest text-slate-900 w-fit mb-3">{card.tag}</span>
+                  <h4 className="text-white text-2xl font-black tracking-tight">{card.title}</h4>
+                  <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mt-1">{card.subtitle}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* Map Peek */}
+        <section className="px-6 mt-6 pb-12">
+          <div className="h-40 w-full rounded-[48px] overflow-hidden relative shadow-premium group cursor-pointer border border-white/10 dark:border-white/5">
+            <div
+              className="absolute inset-0 bg-slate-900 bg-cover bg-center transition-transform duration-[10s] group-hover:scale-110 opacity-70 group-hover:opacity-90"
+              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526778548025-fa2f459cd5ce?q=80&w=1000&auto=format&fit=crop')" }}
+            ></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 gap-4">
+              <div className="glass px-6 py-3 rounded-full flex items-center gap-3 border border-white/20 shadow-gold-glow animate-bounce">
+                <span className="size-2.5 rounded-full bg-primary shadow-[0_0_15px_#D4AF37]"></span>
+                <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">12 Concierges Ativos na Região</span>
+              </div>
+              <h4 className="text-white text-lg font-black uppercase tracking-[0.1em] text-center">Abrir Mapa em Tempo Real</h4>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+
+  const renderProfile = () => (
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-24 animate-in fade-in duration-500">
+      <div className="flex items-center glass p-5 justify-between sticky top-0 z-30 border-b border-white/10 dark:border-white/5">
+        <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display">Meu Perfil</h2>
+      </div>
+
+      <div className="relative px-6 py-10 overflow-hidden">
+        <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 bg-primary/10 rounded-full blur-[100px] -z-10"></div>
+        <div className="flex w-full flex-col gap-6 items-center">
+          <div className="relative">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 border-4 border-primary shadow-gold-glow transition-transform"
+              style={{ backgroundImage: `url('${userData.avatar}')` }}
+            />
+            <div className="absolute bottom-1 right-1 bg-primary text-slate-900 p-2.5 rounded-full border-2 border-white dark:border-background-dark flex items-center justify-center cursor-pointer shadow-lg active:scale-90 transition-all">
+              <span className="material-symbols-outlined text-sm font-bold">edit</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-center text-center">
+            <h1 className="text-slate-900 dark:text-white text-3xl font-black leading-tight tracking-tight font-display">{userData.name}</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-bold font-display mt-1">{userData.email}</p>
+
+            <div className="flex items-center gap-4 mt-6">
+              {[
+                { val: '4.9', label: 'Avaliação' },
+                { val: '124', label: 'Pedidos' },
+                { val: 'Lvl 8', label: 'Membro' },
+              ].map((stat, i) => (
+                <div key={i} className="flex flex-col items-center px-4 py-3 bg-white dark:bg-surface-dark rounded-3xl shadow-premium border border-slate-100 dark:border-white/5 min-w-[80px]">
+                  <span className="text-primary font-black text-lg leading-none mb-1">{stat.val}</span>
+                  <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.1em]">{stat.label}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Services Grid */}
-        <div className="px-4 pt-4">
-          <h2 className="text-lg font-bold mb-4 text-left font-display">
-            {searchQuery ? `Resultados para "${searchQuery}"` : 'Nossos Serviços'}
-          </h2>
-          <div className="grid grid-cols-3 gap-3">
-            {filteredServices.length > 0 ? (
-              filteredServices.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:border-primary active:scale-95 transition-all cursor-pointer shadow-sm"
-                  onClick={() => {
-                    if (item.id === 'mototaxi') {
-                      setCurrentView('mototaxi_request');
-                    } else if (item.id === 'pet') {
-                      setCurrentView('pet_shop');
-                    } else if (item.id === 'entrega' || item.id === 'mercado') {
-                      setActiveService(item);
-                      setCurrentView('food_categories');
-                    } else {
-                      setActiveService(item);
-                      setCurrentView('shipping_details');
-                    }
-                  }}
-                >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${item.gray ? 'bg-slate-200 dark:bg-slate-700' : 'bg-primary/20'}`}>
-                    <span className={`material-symbols-outlined text-2xl ${item.gray ? 'text-slate-500 dark:text-slate-400' : 'text-slate-900 dark:text-primary'}`}>
-                      {item.icon}
-                    </span>
-                  </div>
-                  <span className="text-xs font-semibold text-center font-display">{item.label}</span>
-                </div>
-              ))
-            ) : (
-              <div className="col-span-3 py-8 text-center text-slate-500 font-display">
-                Nenhum serviço encontrado.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="px-4 mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold font-display">Atividade Recente</h2>
-            <button className="text-xs font-bold text-primary font-display" onClick={() => setActiveTab('history')}>Ver tudo</button>
-          </div>
+      <div className="flex-1 px-4 space-y-8">
+        <div>
+          <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] pb-5 px-3 font-display">Sua Experiência Premium</h3>
           <div className="space-y-3">
-            {RECENT_ACTIVITY.slice(0, 2).map((activity) => (
-              <div key={activity.id} className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer bg-white dark:bg-slate-900/50 shadow-sm">
-                <div className={`w-10 h-10 rounded-lg ${activity.bgColor} flex items-center justify-center`}>
-                  <span className={`material-symbols-outlined ${activity.iconColor}`}>{activity.icon}</span>
+            {[
+              { icon: 'person', label: 'Meus Dados', view: 'my_data' },
+              { icon: 'payments', label: 'Métodos de Pagamento', view: 'payment_methods' },
+              { icon: 'location_on', label: 'Endereços Salvos', view: 'saved_addresses' },
+              { icon: 'confirmation_number', label: 'Cupons e Promoções', view: 'coupons' },
+              { icon: 'history', label: 'Histórico de Pedidos', view: 'order_history' },
+              { icon: 'help', label: 'Ajuda e Suporte', view: 'support' },
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setCurrentView(item.view as ViewState)}
+                className="flex items-center gap-5 bg-white dark:bg-surface-dark p-5 rounded-[32px] hover:bg-slate-50 dark:hover:bg-white/[0.03] transition-all cursor-pointer group shadow-premium border border-slate-100 dark:border-white/5"
+              >
+                <div className="flex items-center justify-center rounded-2xl bg-gold-50 dark:bg-gold-900/10 shrink-0 size-12 shadow-inner group-hover:bg-primary transition-colors">
+                  <span className="material-symbols-outlined text-primary group-hover:text-slate-900 transition-colors">{item.icon}</span>
                 </div>
-                <div className="flex-1 text-left">
-                  <h4 className="text-sm font-bold font-display">{activity.title}</h4>
-                  <p className="text-xs text-slate-500 font-display">{activity.subtitle}</p>
-                </div>
-                <span className="text-xs font-medium text-slate-400 font-display">{activity.time}</span>
-              </div>
+                <p className="text-slate-900 dark:text-white text-base font-bold flex-1 font-display tracking-tight">{item.label}</p>
+                <span className="material-symbols-outlined text-slate-300 dark:text-slate-700 group-hover:translate-x-1 transition-transform">chevron_right</span>
+              </motion.div>
             ))}
           </div>
         </div>
 
-        {/* Quick Map Peek */}
-        <div className="px-4 mt-8 pb-8">
-          <div className="h-32 w-full rounded-2xl overflow-hidden relative border border-slate-100 dark:border-slate-800 group cursor-pointer shadow-md">
-            <div
-              className="absolute inset-0 bg-slate-200 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-              style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBDsPsvjf9cEz7PLbRX-NgcK1gs2aH4Fm3yNAT9l-nA-Crj3zdI2iJQy66cBbx6SUkWJdwgrUE7yj4ICJp3fQChmgvsi8GcUojV9Cm7nk9vmlx4Yg9IlGDnK0WTaLgNKdBHFFXwzACR1xiLygDP8IJ1r2bDM1g7LMfwViCXZB2P5dLGsNtbAcOuQvaQPaEAjh_wKyZ2c1-Jl3Ax1RpEM_ep9wA8UeaAk7qGqqOcKI91D3Au-3UInYqY2nMmThGc9Jc-w9DY38kbrvDc')" }}
-            ></div>
-            <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-white dark:bg-slate-900 px-4 py-2 rounded-full shadow-lg flex items-center gap-2 transform transition-transform group-hover:scale-105">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                <span className="text-xs font-bold text-slate-900 dark:text-white font-display">12 Motoristas por perto</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </>
-  );
-
-  const renderProfile = () => (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-background-dark pb-24">
-      {/* Top Bar */}
-      <div className="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10 border-b border-slate-100 dark:border-slate-800">
-        <div
-          className="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-start cursor-pointer active:scale-95 transition-transform"
-          onClick={() => setActiveTab('home')}
-        >
-          <span className="material-symbols-outlined">arrow_back</span>
-        </div>
-        <h2 className="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center font-display">Perfil</h2>
-        <div className="flex w-12 items-center justify-end">
-          <button className="flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <span className="material-symbols-outlined text-slate-900 dark:text-slate-100">settings</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Profile Header */}
-      <div className="flex p-6">
-        <div className="flex w-full flex-col gap-4 items-center">
-          <div className="flex gap-4 flex-col items-center">
-            <div className="relative">
-              <div
-                className="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 border-4 border-primary shadow-lg transition-transform hover:scale-105"
-                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC1kK06avEJV3GlHT9jYD09fWkHVZdK7zkHeHYogAjmBCqXwyB_Ygnp3VZ9juLgAqaSvGhvLzQon1d7E9tLz_5kVT7CIf_s7qK74PPyuFi4HGrlcx85SrJRMc3UvL-oBQ1GoxCcS-T0sYZ-XkHgn_gvv1HOP66lHmV8hDOtsFJkcWIz1OCMuAhRW6lBogvrB61Ss0xec2nTU124JXBhsR9bdk4ClV3OzNeDDbn4Z1bMcDbGnPQ-fG-Vr9-PzNYb-NYt0MQiw1TsAYN7')" }}
-              >
-              </div>
-              <div className="absolute bottom-1 right-1 bg-primary text-slate-900 p-1.5 rounded-full border-2 border-white flex items-center justify-center cursor-pointer shadow-md active:scale-90 transition-transform">
-                <span className="material-symbols-outlined text-sm font-bold">edit</span>
-              </div>
-            </div>
-            <div className="flex flex-col items-center justify-center">
-              <p className="text-slate-900 dark:text-slate-100 text-2xl font-bold leading-tight tracking-tight text-center font-display">Ricardo Oliveira</p>
-              <p className="text-slate-500 dark:text-slate-400 text-base font-medium leading-normal text-center font-display">ricardo.oliveira@email.com</p>
-              <div className="flex items-center gap-1 mt-1 bg-primary/10 px-3 py-1 rounded-full">
-                <span className="material-symbols-outlined text-primary text-sm fill-1">star</span>
-                <p className="text-slate-800 dark:text-slate-200 text-sm font-bold leading-normal text-center font-display">4.9</p>
-                <span className="text-slate-400 text-xs font-normal ml-1 font-display">• 124 pedidos</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Menu Sections */}
-      <div className="flex-1 px-4 overflow-y-auto">
-        {/* Account Section */}
-        <h3 className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest pb-3 pt-6 px-2 font-display">Minha Conta</h3>
-        <div className="space-y-1">
-          {[
-            { icon: 'person', label: 'Meus Dados' },
-            { icon: 'payments', label: 'Métodos de Pagamento' },
-            { icon: 'location_on', label: 'Endereços Salvos' },
-          ].map((item, idx) => (
-            <div key={idx} className="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer group shadow-sm mb-1">
-              <div className="text-slate-900 dark:text-slate-100 flex items-center justify-center rounded-lg bg-primary/20 shrink-0 size-10">
-                <span className="material-symbols-outlined text-slate-800 dark:text-primary">{item.icon}</span>
-              </div>
-              <p className="text-slate-900 dark:text-slate-100 text-base font-semibold flex-1 font-display">{item.label}</p>
-              <span className="material-symbols-outlined text-slate-400 group-hover:translate-x-1 transition-transform">chevron_right</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Perks & History Section */}
-        <h3 className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest pb-3 pt-8 px-2 font-display">Atividades e Promoções</h3>
-        <div className="space-y-1">
-          {[
-            { icon: 'confirmation_number', label: 'Cupons e Promoções' },
-            { icon: 'history', label: 'Histórico de Pedidos', onClick: () => setActiveTab('history') },
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              onClick={item.onClick}
-              className="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer group shadow-sm mb-1"
-            >
-              <div className="text-slate-900 dark:text-slate-100 flex items-center justify-center rounded-lg bg-primary/20 shrink-0 size-10">
-                <span className="material-symbols-outlined text-slate-800 dark:text-primary">{item.icon}</span>
-              </div>
-              <p className="text-slate-900 dark:text-slate-100 text-base font-semibold flex-1 font-display">{item.label}</p>
-              <span className="material-symbols-outlined text-slate-400 group-hover:translate-x-1 transition-transform">chevron_right</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Support & Settings Section */}
-        <h3 className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest pb-3 pt-8 px-2 font-display">Geral</h3>
-        <div className="space-y-1">
-          <div className="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer group shadow-sm mb-1">
-            <div className="text-slate-900 dark:text-slate-100 flex items-center justify-center rounded-lg bg-primary/20 shrink-0 size-10">
-              <span className="material-symbols-outlined text-slate-800 dark:text-primary">help</span>
-            </div>
-            <p className="text-slate-900 dark:text-slate-100 text-base font-semibold flex-1 font-display">Ajuda e Suporte</p>
-            <span className="material-symbols-outlined text-slate-400 group-hover:translate-x-1 transition-transform">chevron_right</span>
-          </div>
-          <div
-            className="flex items-center gap-4 bg-white dark:bg-slate-900/50 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer group shadow-sm"
-            onClick={() => {
-              alert('Fazendo logout...');
-              setCurrentView('onboarding');
-            }}
+        <div className="pb-12 text-center space-y-6">
+          <motion.div
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-4 bg-red-500/5 p-5 rounded-[32px] cursor-pointer group border border-red-500/10 hover:bg-red-500/10 transition-all"
+            onClick={() => { if (confirm('Sair da conta?')) setCurrentView('onboarding'); }}
           >
-            <div className="text-red-500 flex items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30 shrink-0 size-10">
+            <div className="text-red-500 flex items-center justify-center rounded-2xl bg-red-500/10 shrink-0 size-12 shadow-inner">
               <span className="material-symbols-outlined">logout</span>
             </div>
-            <p className="text-red-500 text-base font-semibold flex-1 font-display">Sair da conta</p>
-          </div>
-        </div>
+            <p className="text-red-500 text-base font-black flex-1 font-display tracking-tight text-left">Encerrar Sessão</p>
+          </motion.div>
 
-        <div className="mt-8 mb-4 text-center border-t border-slate-100 dark:border-slate-800 pt-4">
-          <p className="text-slate-400 text-xs font-display">Versão 4.12.0 (Build 342)</p>
+          <p className="text-slate-400 dark:text-slate-600 text-[10px] font-black uppercase tracking-[0.4em] font-display px-2">
+            Multi-Service Delivery Lux • Versão 4.12.0
+          </p>
         </div>
       </div>
     </div>
   );
 
-  const renderHistory = () => (
-    <div className="px-4 pt-4 space-y-4 min-h-screen bg-slate-50 dark:bg-background-dark pb-32 flex flex-col">
-      <div className="flex items-center gap-2 mb-4">
-        <button onClick={() => setActiveTab('profile')} className="p-2 -ml-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+  const renderMyData = () => (
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-24 animate-in slide-in-from-right duration-500">
+      <div className="flex items-center glass p-5 sticky top-0 z-30 border-b border-white/10 dark:border-white/5">
+        <button onClick={() => setCurrentView('profile')} className="text-slate-900 dark:text-white p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all">
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
-        <h2 className="text-2xl font-bold text-left font-display">Histórico de Pedidos</h2>
+        <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display mr-10 uppercase">Meus Dados</h2>
       </div>
-      <div className="space-y-4 flex-1">
-        {RECENT_ACTIVITY.map((activity) => (
-          <div key={activity.id} className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm transition-transform active:scale-[0.98]">
-            <div className={`w-12 h-12 rounded-xl ${activity.bgColor} flex items-center justify-center`}>
-              <span className={`material-symbols-outlined text-2xl ${activity.iconColor}`}>{activity.icon}</span>
+      <div className="p-8 space-y-8">
+        <div className="flex flex-col items-center">
+          <div className="relative group">
+            <div className="size-32 rounded-full border-4 border-primary bg-center bg-cover shadow-gold-glow" style={{ backgroundImage: `url('${userData.avatar}')` }} />
+            <div className="absolute -bottom-1 -right-1 bg-primary text-slate-900 p-2.5 rounded-full border-2 border-white dark:border-background-dark shadow-xl active:scale-90 cursor-pointer">
+              <span className="material-symbols-outlined text-sm font-bold">photo_camera</span>
             </div>
-            <div className="flex-1 text-left">
-              <h4 className="font-bold text-slate-900 dark:text-white font-display">{activity.title}</h4>
-              <p className="text-sm text-slate-500 font-display">{activity.subtitle}</p>
-              <p className="text-xs text-slate-400 mt-1 font-display">{activity.time}</p>
-            </div>
-            <button className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
-              <span className="material-symbols-outlined text-slate-400">chevron_right</span>
-            </button>
           </div>
-        ))}
+        </div>
+        <div className="space-y-6">
+          {[
+            { label: 'Nome Completo', val: userData.name, type: 'text' },
+            { label: 'E-mail', val: userData.email, type: 'email' },
+            { label: 'Telefone', val: userData.phone, type: 'tel' },
+            { label: 'CPF', val: '***.***.***-**', type: 'text' },
+          ].map((field, i) => (
+            <label key={i} className="block space-y-2 group">
+              <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-2 group-focus-within:text-primary transition-colors">{field.label}</span>
+              <input
+                type={field.type}
+                defaultValue={field.val}
+                className="w-full bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[24px] p-5 text-slate-900 dark:text-white font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all shadow-premium"
+              />
+            </label>
+          ))}
+        </div>
+        <button className="w-full bg-primary hover:bg-gold-600 text-slate-900 font-black py-6 rounded-[28px] shadow-2xl shadow-primary/30 transition-all active:scale-[0.98] mt-4 uppercase tracking-[0.2em] text-sm">Salvar Alterações</button>
+      </div>
+    </div>
+  );
+
+  const renderPaymentMethods = () => (
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-24 animate-in slide-in-from-right duration-500">
+      <div className="flex items-center glass p-5 sticky top-0 z-30 border-b border-white/10 dark:border-white/5">
+        <button onClick={() => setCurrentView('profile')} className="text-slate-900 dark:text-white p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all">
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display mr-10 uppercase">Pagamentos</h2>
+      </div>
+      <div className="p-8 space-y-8">
+        <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-2 font-display">Cartões Selecionados</h3>
+        <div className="relative group">
+          <div className="relative h-60 w-full rounded-[40px] overflow-hidden shadow-2xl p-8 flex flex-col justify-between text-white bg-gradient-to-br from-slate-900 via-slate-800 to-black border border-white/10 transition-transform group-hover:scale-[1.02] duration-500">
+            <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-48 h-48 bg-primary/20 rounded-full blur-[80px] -z-0"></div>
+            <div className="flex justify-between items-start relative z-10">
+              <span className="material-symbols-outlined text-5xl text-primary drop-shadow-[0_0_10px_rgba(212,175,55,0.4)]">contactless</span>
+              <div className="h-8 w-12 bg-white/10 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/5">
+                <span className="text-[8px] font-black uppercase tracking-tighter opacity-60">Gold Card</span>
+              </div>
+            </div>
+            <div className="space-y-6 relative z-10">
+              <p className="text-2xl font-black tracking-[0.25em] font-display text-shadow">•••• •••• •••• 4582</p>
+              <div className="flex justify-between items-end">
+                <div>
+                  <p className="text-[10px] font-black uppercase opacity-40 mb-1 tracking-widest">Titular</p>
+                  <p className="font-bold text-sm uppercase tracking-wide">{userData.name}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase opacity-40 mb-1 tracking-widest">Até</p>
+                  <p className="font-bold text-sm">12/28</p>
+                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" className="h-4 object-contain brightness-0 invert opacity-80" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button className="w-full bg-white dark:bg-surface-dark border-2 border-dashed border-slate-200 dark:border-white/5 py-6 rounded-[32px] flex items-center justify-center gap-3 text-slate-500 dark:text-slate-400 font-black transition-all hover:border-primary/50 hover:text-primary hover:bg-gold-50/10 active:scale-[0.98] uppercase tracking-widest text-xs">
+          <span className="material-symbols-outlined text-xl">add_card</span>
+          Novo Cartão de Crédito
+        </button>
+
+        <div className="pt-4 space-y-4">
+          <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-2 font-display">Carteiras Digitais</h3>
+          <div className="flex items-center gap-5 bg-white dark:bg-surface-dark p-5 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium group cursor-pointer hover:border-primary/20 transition-all">
+            <div className="size-14 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-blue-500 text-3xl">pix</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-black text-slate-900 dark:text-white text-lg tracking-tight">PIX Instantâneo</p>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Conectado • Preferencial</p>
+            </div>
+            <div className="bg-green-500/10 text-green-500 text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest">Ativo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSavedAddresses = () => (
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-24 animate-in slide-in-from-right duration-500">
+      <div className="flex items-center glass p-5 sticky top-0 z-30 border-b border-white/10 dark:border-white/5">
+        <button onClick={() => setCurrentView('profile')} className="text-slate-900 dark:text-white p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all">
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display mr-10 uppercase">Endereços</h2>
+      </div>
+      <div className="p-8 space-y-6">
+        <div className="space-y-4">
+          {[
+            { id: 1, type: 'Casa', address: 'Rua das Flores, 123 - Centro', icon: 'home_app_logo' },
+            { id: 2, type: 'Trabalho', address: 'Av. Paulista, 1500 - Bela Vista', icon: 'corporate_fare' },
+            { id: 3, type: 'Academia', address: 'Rua Augusta, 450 - Consolação', icon: 'fitness_center' },
+          ].map((addr) => (
+            <div key={addr.id} className="flex items-center gap-5 bg-white dark:bg-surface-dark p-5 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium group transition-all hover:border-primary/30">
+              <div className="size-14 rounded-2xl bg-gold-50 dark:bg-gold-500/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-slate-900 transition-all">
+                <span className="material-symbols-outlined text-2xl">{addr.icon}</span>
+              </div>
+              <div className="flex-1">
+                <p className="font-black text-slate-900 dark:text-white text-lg tracking-tight leading-none mb-1">{addr.type}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-bold truncate max-w-[200px]">{addr.address}</p>
+              </div>
+              <button className="text-slate-300 dark:text-slate-700 hover:text-red-500 transition-colors p-2">
+                <span className="material-symbols-outlined text-xl">delete</span>
+              </button>
+            </div>
+          ))}
+        </div>
+        <button className="w-full bg-primary hover:bg-gold-600 text-slate-900 font-black py-6 rounded-[28px] shadow-2xl shadow-primary/30 transition-all active:scale-[0.98] mt-6 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-sm">
+          <span className="material-symbols-outlined">add_location_alt</span>
+          Novo Destino Premium
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderCoupons = () => (
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-24 animate-in slide-in-from-right duration-500">
+      <div className="flex items-center glass p-5 sticky top-0 z-30 border-b border-white/10 dark:border-white/5">
+        <button onClick={() => setCurrentView('profile')} className="text-slate-900 dark:text-white p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all">
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display mr-10 uppercase">Privilégios</h2>
+      </div>
+      <div className="p-8 space-y-8">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-black p-8 rounded-[40px] shadow-premium relative overflow-hidden group">
+          <div className="absolute -right-6 -top-6 size-48 bg-primary/20 rounded-full blur-[60px] group-hover:bg-primary/30 transition-all duration-700"></div>
+          <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.4em] mb-2">Seus Pontos Elite</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-primary text-5xl font-black italic">2.450</p>
+            <span className="text-white/60 font-black text-sm uppercase tracking-widest">Pontos</span>
+          </div>
+          <div className="mt-8 flex items-center gap-3">
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-3 px-4 flex items-center gap-3 border border-white/10">
+              <span className="material-symbols-outlined text-primary text-xl fill-1">military_tech</span>
+              <span className="text-white font-black text-[10px] uppercase tracking-[0.2em] leading-none">Vip Elite Club</span>
+            </div>
+            <div className="h-1 flex-1 bg-white/10 rounded-full overflow-hidden">
+              <div className="h-full bg-primary w-[75%] rounded-full shadow-gold-glow"></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-2 font-display">Ofertas Exclusivas</h3>
+          {[
+            { code: 'VIPGOLD50', desc: '50% de Desconto em Deliveries', expiry: '30 Mar' },
+            { code: 'FREETRANSPORT', desc: 'Viagem Grátis até R$ 20,00', expiry: '15 Abr' },
+          ].map((coupon, i) => (
+            <div key={i} className="relative group overflow-hidden bg-white dark:bg-surface-dark p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium flex items-center justify-between before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:-translate-x-3 before:size-6 before:bg-background-light dark:before:bg-background-dark before:rounded-full after:absolute after:right-0 after:top-1/2 after:-translate-y-1/2 after:translate-x-3 after:size-6 after:bg-background-light dark:after:bg-background-dark after:rounded-full">
+              <div className="flex items-center gap-5">
+                <div className="size-16 rounded-2xl bg-gold-50 dark:bg-gold-500/10 flex flex-col items-center justify-center border-r border-dashed border-gold-200 dark:border-white/10 pr-5 shrink-0">
+                  <span className="material-symbols-outlined text-primary text-2xl">auto_awesome</span>
+                </div>
+                <div>
+                  <p className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-widest leading-none mb-1 group-hover:text-primary transition-colors">{coupon.code}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{coupon.desc}</p>
+                  <p className="text-[8px] text-primary/60 font-black uppercase mt-1">Expira em {coupon.expiry}</p>
+                </div>
+              </div>
+              <button className="bg-primary/10 text-primary font-black text-[10px] px-5 py-2.5 rounded-full uppercase tracking-widest hover:bg-primary hover:text-slate-900 transition-all z-10 border border-primary/20">Copiar</button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSupport = () => (
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-24 animate-in slide-in-from-right duration-500">
+      <div className="flex items-center glass p-5 sticky top-0 z-30 border-b border-white/10 dark:border-white/5">
+        <button onClick={() => setCurrentView('profile')} className="text-slate-900 dark:text-white p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all">
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display mr-10 uppercase">Suporte</h2>
+      </div>
+      <div className="p-8 space-y-10">
+        <div className="text-center space-y-3">
+          <div className="size-20 bg-primary/10 rounded-[30px] flex items-center justify-center mx-auto mb-4 border border-primary/20 shadow-gold-glow">
+            <span className="material-symbols-outlined text-4xl text-primary animate-pulse">support_agent</span>
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Concierge 24/7</h1>
+          <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Atendimento prioritário em andamento</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-5">
+          {[
+            { label: 'Chat Online', icon: 'forum', color: 'bg-gold-50 dark:bg-gold-500/10' },
+            { label: 'Ligar Agora', icon: 'phone_in_talk', color: 'bg-green-500/10' },
+          ].map((item, i) => (
+            <div key={i} className="bg-white dark:bg-surface-dark p-6 rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium text-center flex flex-col items-center gap-4 active:scale-95 transition-all group hover:border-primary/20 cursor-pointer">
+              <div className={`size-14 rounded-2xl ${item.color} flex items-center justify-center text-primary group-hover:scale-110 transition-transform`}>
+                <span className="material-symbols-outlined text-3xl">{item.icon}</span>
+              </div>
+              <p className="font-black text-[10px] text-slate-900 dark:text-white uppercase tracking-[0.2em]">{item.label}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-3 font-display">Tópicos VIP</h3>
+          {[
+            { q: 'Problemas com Pedido Elite', icon: 'shopping_bag' },
+            { q: 'Gestão de Pagamentos', icon: 'account_balance' },
+            { q: 'Segurança & Biometria', icon: 'fingerprint' },
+            { q: 'Solicitar Parcerias Lux', icon: 'diamond' }
+          ].map((item, i) => (
+            <div key={i} className="flex items-center justify-between bg-white dark:bg-surface-dark p-6 rounded-[28px] border border-slate-100 dark:border-white/5 shadow-premium group cursor-pointer transition-all hover:border-primary/30">
+              <div className="flex items-center gap-4">
+                <span className="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors text-xl">{item.icon}</span>
+                <p className="font-bold text-slate-700 dark:text-slate-200 text-sm">{item.q}</p>
+              </div>
+              <span className="material-symbols-outlined text-slate-300 dark:text-slate-700 group-hover:translate-x-1 transition-transform">chevron_right</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderOrderHistory = () => (
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-24 animate-in slide-in-from-right duration-500">
+      <div className="flex items-center glass p-5 sticky top-0 z-30 border-b border-white/10 dark:border-white/5">
+        <button onClick={() => setCurrentView('profile')} className="text-slate-900 dark:text-white p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all">
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display mr-10 uppercase">Histórico</h2>
+      </div>
+      <div className="p-8 space-y-8">
+        <div className="space-y-6">
+          {RECENT_ACTIVITY.map((activity) => (
+            <div key={activity.id} className="flex flex-col bg-white dark:bg-surface-dark p-6 rounded-[40px] border border-slate-100 dark:border-white/5 shadow-premium group transition-all hover:scale-[1.01]">
+              <div className="flex items-center gap-5 mb-6">
+                <div className={`size-16 rounded-2xl ${activity.bgColor} flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform`}>
+                  <span className={`material-symbols-outlined text-3xl ${activity.iconColor} fill-1`}>{activity.icon}</span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-black text-slate-900 dark:text-white text-lg tracking-tight leading-none mb-1 uppercase">{activity.title}</h4>
+                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{activity.time} • Concierge Lux</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-black text-primary text-lg">R$ 45,90</p>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-green-500">Finalizado</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button className="flex-1 bg-slate-50 dark:bg-white/[0.03] text-slate-500 font-black text-[10px] py-4 rounded-2xl uppercase tracking-[0.2em] hover:bg-primary/10 hover:text-primary transition-all border border-transparent hover:border-primary/20">Ver Recibo</button>
+                <button className="flex-1 bg-primary text-slate-900 font-black text-[10px] py-4 rounded-2xl uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:brightness-110 transition-all">Repetir Pedido</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -2378,15 +2636,103 @@ function App() {
     </div>
   );
 
+
+
+  const renderOrders = () => {
+    const ACTIVE_ORDERS = [
+      { id: 'ORD-1029', status: 'Em preparo', item: 'Hambúrguer Gourmet', store: 'Burger King', progress: 45, icon: 'restaurant', time: 'Enviado às 19:45' },
+      { id: 'ORD-8829', status: 'A caminho', item: 'Entrega de Documentos', store: 'Minha Localização', progress: 85, icon: 'bolt', time: 'Retirado às 20:12' },
+    ];
+
+    return (
+      <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-32 animate-in fade-in duration-500">
+        <div className="flex items-center glass p-5 sticky top-0 z-30 border-b border-white/10 dark:border-white/5">
+          <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display uppercase tracking-[0.2em]">Meus Pedidos</h2>
+        </div>
+
+        <main className="flex-1 p-6 space-y-8 overflow-y-auto">
+          <div className="space-y-6">
+            <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-2 font-display">Rastreamento Premium</h3>
+            {ACTIVE_ORDERS.map((order) => (
+              <div key={order.id} className="relative group bg-white dark:bg-surface-dark p-6 rounded-[40px] border border-slate-100 dark:border-white/5 shadow-premium overflow-hidden transition-all hover:scale-[1.01]">
+                <div className="flex items-center gap-5 mb-6">
+                  <div className="size-16 rounded-2xl bg-gold-50 dark:bg-gold-500/10 flex items-center justify-center shrink-0 border border-primary/10 transition-colors group-hover:bg-primary group-hover:text-slate-900">
+                    <span className="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">{order.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-black text-slate-900 dark:text-white text-lg tracking-tight leading-none mb-1">{order.item}</h4>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{order.store}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] bg-primary/10 text-primary font-black px-3 py-1.5 rounded-full uppercase tracking-widest animate-pulse">{order.status}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <span>Progresso Elite</span>
+                    <span className="text-primary font-black">{order.progress}%</span>
+                  </div>
+                  <div className="h-2.5 w-full bg-slate-50 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${order.progress}%` }}
+                      transition={{ duration: 1.5, ease: 'easeOut' }}
+                      className="h-full bg-primary shadow-gold-glow relative"
+                    >
+                      <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                    </motion.div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex gap-3">
+                  <button className="flex-1 bg-slate-50 dark:bg-white/[0.03] text-slate-500 font-black text-[10px] py-4 rounded-2xl uppercase tracking-[0.2em] hover:bg-primary/20 hover:text-primary transition-all border border-transparent hover:border-primary/20">Chat Concierge</button>
+                  <button className="flex-1 bg-primary text-slate-900 font-black text-[10px] py-4 rounded-2xl uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:brightness-110 transition-all">Priorizar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-6 pt-4">
+            <div className="flex items-center justify-between px-2">
+              <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] font-display">Histórico Lux</h3>
+              <button onClick={() => setActiveTab('history')} className="text-[10px] font-black text-primary uppercase tracking-widest border-b border-primary/30 pb-0.5">Ver Tudo</button>
+            </div>
+            <div className="space-y-4">
+              {RECENT_ACTIVITY.map((activity) => (
+                <div key={activity.id} className="flex items-center gap-5 p-5 bg-white dark:bg-surface-dark rounded-[32px] border border-slate-100 dark:border-white/5 shadow-premium group cursor-pointer transition-all hover:border-primary/20">
+                  <div className={`size-12 rounded-2xl ${activity.bgColor} flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform`}>
+                    <span className={`material-symbols-outlined text-xl ${activity.iconColor}`}>{activity.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{activity.title}</h4>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{activity.time} • R$ {Math.floor(Math.random() * 50 + 20)},00</p>
+                  </div>
+                  <span className="material-symbols-outlined text-slate-300 dark:text-slate-700 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  };
+
   const renderSearch = () => (
-    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-32">
-      <header className="p-4 bg-white dark:bg-slate-900 sticky top-0 z-30 border-b border-slate-100 dark:border-slate-800">
-        <div className="relative">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-32 animate-in fade-in duration-500">
+      <header className="p-6 space-y-6 sticky top-0 glass z-30 border-b border-white/10 dark:border-white/5">
+        <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight text-center font-display uppercase tracking-[0.3em]">Pesquisa Lux</h2>
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+            <span className="material-symbols-outlined text-primary group-focus-within:scale-125 transition-transform duration-500">search</span>
+          </div>
           <input
-            autoFocus
-            className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-primary/50 font-display transition-all"
-            placeholder="O que você está procurando?"
+            className="block w-full pl-14 pr-6 py-5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-[30px] text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-400 shadow-premium"
+            placeholder="O que você deseja hoje?"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -2394,147 +2740,81 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 p-6 space-y-8 overflow-y-auto">
-        {!searchQuery && (
-          <section className="space-y-4">
-            <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Buscas Recentes</h3>
-            <div className="flex flex-wrap gap-2">
-              {['Hambúrguer', 'Remédios', 'Documentos', 'Mercado'].map((term) => (
-                <button
-                  key={term}
-                  onClick={() => setSearchQuery(term)}
-                  className="px-4 py-2 bg-white dark:bg-slate-800 rounded-full border border-slate-100 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300 hover:border-primary transition-colors flex items-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-sm">history</span>
-                  {term}
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
+      <main className="flex-1 p-6 space-y-10 overflow-y-auto">
+        {!searchQuery ? (
+          <>
+            <section className="space-y-6">
+              <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-3 font-display">Categorias Elite</h3>
+              <div className="grid grid-cols-2 gap-5">
+                {[
+                  { id: 'express', label: 'Entrega Rápida', color: 'bg-yellow-500/10 text-yellow-600', icon: 'bolt' },
+                  { id: 'food', label: 'Gourmet Food', color: 'bg-red-500/10 text-red-600', icon: 'restaurant' },
+                  { id: 'packages', label: 'Pacotes Lux', color: 'bg-blue-500/10 text-blue-600', icon: 'package_2' },
+                  { id: 'health', label: 'Saúde & Wellness', color: 'bg-green-500/10 text-green-600', icon: 'medical_services' },
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
+                    className={`flex flex-col p-7 rounded-[40px] ${cat.color} border border-transparent hover:border-current transition-all text-left space-y-5 shadow-premium group active:scale-95`}
+                  >
+                    <div className="size-14 rounded-2xl bg-white/20 dark:bg-black/20 backdrop-blur-md flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                      <span className="material-symbols-outlined text-3xl group-hover:rotate-12 transition-transform">{cat.icon}</span>
+                    </div>
+                    <span className="font-black text-base tracking-tight uppercase leading-tight">{cat.label}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
 
-        <section className="space-y-4">
-          <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Categorias Populares</h3>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { id: 'express', label: 'Expressas', color: 'bg-yellow-500/10 text-yellow-600', icon: 'bolt' },
-              { id: 'food', label: 'Comida', color: 'bg-red-500/10 text-red-600', icon: 'restaurant' },
-              { id: 'packages', label: 'Pacotes', color: 'bg-blue-500/10 text-blue-600', icon: 'package' },
-              { id: 'health', label: 'Saúde', color: 'bg-green-500/10 text-green-600', icon: 'medical_services' },
-            ].map((cat) => (
-              <button
-                key={cat.id}
-                className={`flex flex-col p-5 rounded-3xl ${cat.color} border border-transparent hover:border-current transition-all text-left space-y-3 group`}
-              >
-                <span className="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">{cat.icon}</span>
-                <span className="font-black text-lg tracking-tight uppercase">{cat.label}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {searchQuery && (
-          <section className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Principais Resultados</h3>
-            <div className="space-y-3">
-              {filteredServices.map((service) => (
+            <section className="space-y-4">
+              <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-3 font-display">Mais Buscados</h3>
+              <div className="flex flex-wrap gap-3 px-1">
+                {['Sushi Premium', 'Vinho Importado', 'Farmácia 24h', 'Pet Gourmet', 'Courier Lux'].map((tag) => (
+                  <button key={tag} className="px-5 py-2.5 bg-white dark:bg-surface-dark border border-slate-100 dark:border-white/5 rounded-full text-[10px] font-black uppercase text-slate-500 hover:text-primary hover:border-primary transition-all shadow-sm active:scale-90">
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </section>
+          </>
+        ) : (
+          <section className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <h3 className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-[0.3em] px-3 font-display">Principais Resultados</h3>
+            <div className="space-y-4">
+              {filteredServices.length > 0 ? filteredServices.map((service) => (
                 <div
                   key={service.id}
-                  className="flex items-center gap-4 p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm active:scale-95 transition-all cursor-pointer"
+                  className="flex items-center gap-5 p-6 bg-white dark:bg-surface-dark rounded-[40px] border border-slate-100 dark:border-white/5 shadow-premium active:scale-[0.98] transition-all cursor-pointer group"
                   onClick={() => {
                     setActiveService(service);
                     setCurrentView('shipping_details');
                   }}
                 >
-                  <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center">
-                    <span className="material-symbols-outlined text-primary">{service.icon}</span>
+                  <div className="size-16 bg-gold-50 dark:bg-gold-500/10 rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-slate-900 transition-all duration-500 shadow-inner shrink-0">
+                    <span className="material-symbols-outlined text-primary text-3xl group-hover:scale-110 transition-transform">{service.icon}</span>
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-slate-900 dark:text-white uppercase text-xs tracking-wider">{service.label}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">Disponível agora na sua região</p>
+                    <h4 className="font-black text-slate-900 dark:text-white uppercase text-sm tracking-tight">{service.label}</h4>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">Serviço Concierge Lux Disponível</p>
                   </div>
-                  <span className="material-symbols-outlined text-slate-300">chevron_right</span>
+                  <span className="material-symbols-outlined text-slate-300 dark:text-slate-700 group-hover:translate-x-2 transition-transform">arrow_forward_ios</span>
                 </div>
-              ))}
+              )) : (
+                <div className="py-24 text-center space-y-6">
+                  <div className="size-24 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto opacity-30 border-2 border-dashed border-slate-300">
+                    <span className="material-symbols-outlined text-5xl">search_off</span>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-xs">Nenhum resultado lux encontrado</p>
+                    <p className="text-slate-500 text-[10px] uppercase tracking-widest">Tente buscar por termos mais genéricos</p>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         )}
       </main>
     </div>
   );
-
-  const renderOrders = () => {
-    const ACTIVE_ORDERS = [
-      { id: 'ORD-1029', status: 'Em preparo', item: 'Hambúrguer Gourmet', store: 'Burger King', progress: 45, icon: 'restaurant' },
-      { id: 'ORD-8829', status: 'Motorista a caminho', item: 'Entrega de Documentos', store: 'Minha Localização', progress: 75, icon: 'bolt' },
-    ];
-
-    return (
-      <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-background-dark pb-32">
-        <header className="p-6 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Meus Pedidos</h2>
-        </header>
-
-        <main className="flex-1 p-4 space-y-8 overflow-y-auto">
-          <section className="space-y-4">
-            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-2">Pedidos em Andamento</h3>
-            <div className="space-y-4">
-              {ACTIVE_ORDERS.map((order) => (
-                <div key={order.id} className="bg-white dark:bg-slate-800 p-5 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-md space-y-4 relative overflow-hidden group">
-                  <div className="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <span className="material-symbols-outlined text-primary">{order.icon}</span>
-                      </div>
-                      <div>
-                        <h4 className="font-black text-slate-900 dark:text-white text-sm">{order.store}</h4>
-                        <p className="text-xs text-slate-500 font-bold">{order.item}</p>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-black text-primary px-2 py-1 bg-primary/10 rounded-md uppercase tracking-wider">{order.status}</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-end">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Acompanhamento</span>
-                      <span className="text-[10px] font-black text-slate-900 dark:text-white">{order.progress}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner">
-                      <div className="h-full bg-primary rounded-full transition-all duration-1000" style={{ width: `${order.progress}%` }}></div>
-                    </div>
-                  </div>
-                  <button className="w-full py-3 bg-slate-50 dark:bg-slate-700/50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-300 hover:bg-primary hover:text-slate-900 transition-all border border-slate-100 dark:border-slate-800">
-                    Rastrear Pedido
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Histórico</h3>
-              <button onClick={() => setActiveTab('history')} className="text-[10px] font-black text-primary uppercase border-b-2 border-primary/20">Ver Completo</button>
-            </div>
-            <div className="space-y-2">
-              {RECENT_ACTIVITY.map((activity) => (
-                <div key={activity.id} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800 hover:bg-white transition-all cursor-pointer group">
-                  <div className={`w-10 h-10 rounded-xl ${activity.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    <span className={`material-symbols-outlined text-xl ${activity.iconColor}`}>{activity.icon}</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">{activity.title}</h4>
-                    <p className="text-xs text-slate-400 font-medium">{activity.time} • R$ {Math.floor(Math.random() * 50 + 20)},00</p>
-                  </div>
-                  <span className="material-symbols-outlined text-slate-300 group-hover:translate-x-1 transition-all">chevron_right</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        </main>
-      </div>
-    );
-  };
 
   const renderPetShop = () => (
     <div className="flex flex-col h-screen w-full bg-background-light dark:bg-background-dark font-display">
@@ -2605,29 +2885,29 @@ function App() {
   );
 
   const renderNotifications = () => (
-    <div className="flex flex-col h-screen w-full bg-background-light dark:bg-background-dark font-display">
-      <header className="flex items-center p-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
-        <button className="p-2" onClick={() => setCurrentView('app')}>
+    <div className="flex flex-col min-h-screen bg-background-light dark:bg-background-dark pb-24 animate-in fade-in duration-500">
+      <div className="flex items-center glass p-5 sticky top-0 z-30 border-b border-white/10 dark:border-white/5">
+        <button onClick={() => setCurrentView('app')} className="text-slate-900 dark:text-white p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-all">
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
-        <h2 className="text-lg font-bold flex-1 text-center pr-10">Notificações</h2>
-      </header>
-      <main className="flex-1 overflow-y-auto p-4 space-y-4">
+        <h2 className="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight flex-1 text-center font-display mr-10 uppercase">Avisos Elite</h2>
+      </div>
+      <main className="flex-1 p-8 space-y-6 overflow-y-auto">
         {[
-          { title: 'Promoção Relâmpago ⚡', text: '50% OFF em entregas de mercado hoje!', time: 'Agora', icon: 'bolt', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-          { title: 'Viagem Concluída', text: 'Sua viagem com Ricardo foi finalizada.', time: '2h atrás', icon: 'check_circle', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-          { title: 'Novo Método de Pagamento', text: 'PIX agora disponível para todos os serviços!', time: 'Ontem', icon: 'payments', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
+          { title: 'Privilégio Ativo ⚡', text: '50% OFF em entregas gourmet hoje!', time: 'Agora', icon: 'bolt', color: 'bg-gold-50 dark:bg-gold-900/10 text-primary' },
+          { title: 'Concierge Finalizado', text: 'Sua viagem exclusiva com Ricardo foi concluída.', time: '2h atrás', icon: 'verified', color: 'bg-green-500/10 text-green-500' },
+          { title: 'Elite Payment', text: 'PIX Instantâneo agora é o método preferencial.', time: 'Ontem', icon: 'payments', color: 'bg-blue-500/10 text-blue-500' },
         ].map((notif, idx) => (
-          <div key={idx} className="flex items-start gap-4 p-5 bg-white dark:bg-slate-800 rounded-[28px] border border-slate-100 dark:border-slate-800 shadow-sm">
-            <div className={`w-12 h-12 rounded-2xl ${notif.color} flex items-center justify-center shrink-0`}>
-              <span className="material-symbols-outlined">{notif.icon}</span>
+          <div key={idx} className="flex items-start gap-5 p-6 bg-white dark:bg-surface-dark rounded-[40px] border border-slate-100 dark:border-white/5 shadow-premium group transition-all hover:border-primary/20">
+            <div className={`size-14 rounded-2xl ${notif.color} flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform`}>
+              <span className="material-symbols-outlined text-2xl fill-1">{notif.icon}</span>
             </div>
             <div className="flex-1">
               <div className="flex justify-between items-start mb-1">
-                <h4 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-tight">{notif.title}</h4>
-                <span className="text-[10px] font-bold text-slate-400">{notif.time}</span>
+                <h4 className="font-black text-slate-900 dark:text-white text-sm uppercase tracking-widest">{notif.title}</h4>
+                <span className="text-[10px] font-bold text-slate-400 uppercase">{notif.time}</span>
               </div>
-              <p className="text-xs text-slate-500 leading-relaxed font-medium">{notif.text}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-bold">{notif.text}</p>
             </div>
           </div>
         ))}
@@ -2661,14 +2941,20 @@ function App() {
         {currentView === 'pet_shop' && renderPetShop()}
         {currentView === 'food_categories' && renderFoodCategories()}
         {currentView === 'notifications' && renderNotifications()}
+        {currentView === 'my_data' && renderMyData()}
+        {currentView === 'payment_methods' && renderPaymentMethods()}
+        {currentView === 'saved_addresses' && renderSavedAddresses()}
+        {currentView === 'coupons' && renderCoupons()}
+        {currentView === 'order_history' && renderOrderHistory()}
+        {currentView === 'support' && renderSupport()}
         {currentView === 'app' && (
           <div className="flex flex-col h-full bg-background-light dark:bg-background-dark">
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
               {activeTab === 'home' && renderHome()}
               {activeTab === 'search' && renderSearch()}
               {activeTab === 'orders' && renderOrders()}
               {activeTab === 'profile' && renderProfile()}
-              {activeTab === 'history' && renderHistory()}
+              {activeTab === 'history' && renderOrderHistory()}
             </div>
 
             {/* Bottom Navigation */}
