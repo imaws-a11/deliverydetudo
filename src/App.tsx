@@ -5,7 +5,9 @@ import { supabase } from './lib/supabase';
 function App() {
   const [view, setView] = useState<'onboarding' | 'login' | 'app'>('onboarding');
   const [tab, setTab] = useState<'home' | 'orders' | 'profile'>('home');
-  const [subView, setSubView] = useState<'none' | 'restaurant_list' | 'restaurant_menu' | 'checkout' | 'active_order' | 'addresses' | 'payments'>('none');
+  const [subView, setSubView] = useState<'none' | 'restaurant_list' | 'restaurant_menu' | 'product_detail' | 'checkout' | 'active_order' | 'addresses' | 'payments'>('none');
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [tempQuantity, setTempQuantity] = useState(1);
 
   const [email, setEmail] = useState('cliente@exemplo.com');
   const [password, setPassword] = useState('senha123');
@@ -95,6 +97,7 @@ function App() {
       user_id: userId,
       status: 'pendente',
       total_price: parseFloat(total.toFixed(2)),
+      pickup_address: 'Restaurante Burger Premium • Av. Paulista, 1000',
       delivery_address: 'Casa • Rua Augusta, 45'
     });
 
@@ -238,11 +241,12 @@ function App() {
 
   const renderRestaurantList = () => (
     <div className="absolute inset-0 z-40 bg-background flex flex-col hide-scrollbar overflow-y-auto pb-6">
-      <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center gap-4 mb-4">
-        <button onClick={() => setSubView('none')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform">
-          <span className="material-symbols-rounded text-slate-700">arrow_back</span>
+      <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center justify-between gap-4 mb-4">
+        <button onClick={() => setSubView('none')} className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full shadow-soft active:scale-95 transition-transform text-slate-900 border border-slate-100">
+          <span className="material-symbols-rounded text-xl text-slate-700">arrow_back</span>
+          <span className="font-bold text-sm">Voltar</span>
         </button>
-        <h2 className="text-xl font-black text-slate-900 tracking-tight">Restaurantes</h2>
+        <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">Restaurantes</h2>
       </header>
 
       <div className="px-6 space-y-4">
@@ -270,10 +274,19 @@ function App() {
 
   const renderRestaurantMenu = () => (
     <div className="absolute inset-0 z-50 bg-background flex flex-col hide-scrollbar overflow-y-auto">
-      <div className="relative w-full h-64 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1000&auto=format&fit=crop')" }}>
-        <button onClick={() => setSubView('restaurant_list')} className="absolute top-6 left-6 w-10 h-10 bg-white/80 backdrop-blur-md rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform">
-          <span className="material-symbols-rounded text-slate-900">arrow_back</span>
+      {/* Sticky Header with Back Button */}
+      <header className="fixed top-0 left-0 right-0 z-[60] px-6 py-6 pointer-events-none">
+        <button
+          onClick={() => setSubView('restaurant_list')}
+          className="pointer-events-auto flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-full shadow-lg active:scale-95 transition-transform text-slate-900 border border-white/50"
+        >
+          <span className="material-symbols-rounded text-xl">arrow_back</span>
+          <span className="font-bold text-sm">Voltar</span>
         </button>
+      </header>
+
+      <div className="relative w-full h-64 bg-cover bg-center shrink-0" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1000&auto=format&fit=crop')" }}>
+        <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
       </div>
 
       <div className="flex-1 bg-background -mt-10 rounded-t-[40px] px-6 pt-8 pb-32 relative">
@@ -288,7 +301,11 @@ function App() {
             { id: 3, name: 'Fritas com Cheddar', desc: 'Porção de 300g com molho de cheddar e farofa de bacon.', price: 22.00 }
           ].map((item, i) => (
             <div key={i} className="bg-white p-5 rounded-[28px] shadow-soft border border-slate-100 flex justify-between items-center gap-4">
-              <div className="flex-1">
+              <div className="flex-1 cursor-pointer" onClick={() => {
+                setSelectedItem(item);
+                setTempQuantity(1);
+                setSubView('product_detail');
+              }}>
                 <h4 className="text-base font-black text-slate-900">{item.name}</h4>
                 <p className="text-sm font-medium text-slate-500 mt-1 line-clamp-2">{item.desc}</p>
                 <p className="text-brand-600 font-black mt-2">R$ {item.price.toFixed(2).replace('.', ',')}</p>
@@ -335,11 +352,12 @@ function App() {
 
     return (
       <div className="absolute inset-0 z-[60] bg-background flex flex-col hide-scrollbar overflow-y-auto">
-        <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center gap-4">
-          <button onClick={() => setSubView('restaurant_menu')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform">
-            <span className="material-symbols-rounded text-slate-700">arrow_back</span>
+        <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center justify-between gap-4">
+          <button onClick={() => setSubView('restaurant_menu')} className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full shadow-soft active:scale-95 transition-transform text-slate-900 border border-slate-100">
+            <span className="material-symbols-rounded text-xl text-slate-700">arrow_back</span>
+            <span className="font-bold text-sm">Voltar</span>
           </button>
-          <h2 className="text-xl font-black text-slate-900 tracking-tight">Finalizar Pedido</h2>
+          <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">Finalizar Pedido</h2>
         </header>
 
         <div className="p-6 space-y-6 flex-1">
@@ -497,11 +515,12 @@ function App() {
 
   const renderAddresses = () => (
     <div className="absolute inset-0 z-40 bg-background flex flex-col hide-scrollbar overflow-y-auto">
-      <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center gap-4 mb-4">
-        <button onClick={() => setSubView('none')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform">
-          <span className="material-symbols-rounded text-slate-700">arrow_back</span>
+      <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center justify-between gap-4 mb-4">
+        <button onClick={() => setSubView('none')} className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full shadow-soft active:scale-95 transition-transform text-slate-900 border border-slate-100">
+          <span className="material-symbols-rounded text-xl text-slate-700">arrow_back</span>
+          <span className="font-bold text-sm">Voltar</span>
         </button>
-        <h2 className="text-xl font-black text-slate-900 tracking-tight">Meus Endereços</h2>
+        <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">Meus Endereços</h2>
       </header>
       <div className="px-6 space-y-4">
         <div className="bg-white p-5 rounded-[28px] shadow-soft border-2 border-brand-500">
@@ -522,11 +541,12 @@ function App() {
 
   const renderPayments = () => (
     <div className="absolute inset-0 z-40 bg-background flex flex-col hide-scrollbar overflow-y-auto">
-      <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center gap-4 mb-4">
-        <button onClick={() => setSubView('none')} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-soft active:scale-95 transition-transform">
-          <span className="material-symbols-rounded text-slate-700">arrow_back</span>
+      <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center justify-between gap-4 mb-4">
+        <button onClick={() => setSubView('none')} className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full shadow-soft active:scale-95 transition-transform text-slate-900 border border-slate-100">
+          <span className="material-symbols-rounded text-xl text-slate-700">arrow_back</span>
+          <span className="font-bold text-sm">Voltar</span>
         </button>
-        <h2 className="text-xl font-black text-slate-900 tracking-tight">Pagamentos</h2>
+        <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">Pagamentos</h2>
       </header>
       <div className="px-6 space-y-4">
         <div className="bg-slate-900 p-6 rounded-[28px] shadow-float text-white relative overflow-hidden">
@@ -553,6 +573,60 @@ function App() {
       </div>
     </div>
   );
+
+  const renderProductDetail = () => {
+    if (!selectedItem) return null;
+    return (
+      <div className="absolute inset-0 z-[70] bg-background flex flex-col hide-scrollbar overflow-y-auto">
+        <div className="relative w-full h-80 bg-cover bg-center" style={{ backgroundImage: `url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=600&auto=format&fit=crop')` }}>
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+          <button onClick={() => setSubView('restaurant_menu')} className="absolute top-6 left-6 flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-full shadow-soft active:scale-95 transition-transform text-slate-900">
+            <span className="material-symbols-rounded text-xl">arrow_back</span>
+            <span className="font-bold text-sm">Voltar</span>
+          </button>
+        </div>
+
+        <div className="flex-1 bg-background -mt-10 rounded-t-[40px] px-8 pt-10 pb-32 relative">
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">{selectedItem.name}</h2>
+          <p className="text-brand-600 text-xl font-black mt-3">R$ {selectedItem.price.toFixed(2).replace('.', ',')}</p>
+          <p className="text-slate-500 font-medium text-lg mt-6 leading-relaxed">{selectedItem.desc}</p>
+
+          <div className="mt-12 flex flex-col items-center">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Selecione a quantidade</p>
+            <div className="flex items-center gap-10">
+              <button
+                onClick={() => setTempQuantity(q => Math.max(1, q - 1))}
+                className="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center active:scale-90 transition-transform shadow-inner border border-slate-200"
+              >
+                <span className="material-symbols-rounded text-3xl">remove</span>
+              </button>
+              <span className="text-4xl font-black text-slate-900 min-w-10 text-center">{tempQuantity}</span>
+              <button
+                onClick={() => setTempQuantity(q => q + 1)}
+                className="w-14 h-14 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center active:scale-90 transition-transform shadow-soft border border-brand-100"
+              >
+                <span className="material-symbols-rounded text-3xl">add</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="fixed bottom-10 left-8 right-8 z-[80]">
+          <button
+            onClick={() => {
+              const itemsToAdd = Array(tempQuantity).fill(selectedItem);
+              setCart([...cart, ...itemsToAdd]);
+              setSubView('restaurant_menu');
+            }}
+            className="w-full bg-brand-600 text-white p-6 rounded-[28px] shadow-float flex items-center justify-between active:scale-[0.98] transition-transform"
+          >
+            <span className="font-black text-lg">Adicionar</span>
+            <span className="font-black text-xl bg-white/20 px-4 py-1 rounded-xl">R$ {(selectedItem.price * tempQuantity).toFixed(2).replace('.', ',')}</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const BottomNav = () => (
     <div className="fixed bottom-6 left-6 right-6 z-30">
@@ -590,6 +664,7 @@ function App() {
             <AnimatePresence>
               {subView === 'restaurant_list' && <motion.div key="rlist" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40">{renderRestaurantList()}</motion.div>}
               {subView === 'restaurant_menu' && <motion.div key="rmenu" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-50">{renderRestaurantMenu()}</motion.div>}
+              {subView === 'product_detail' && <motion.div key="pdetail" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-[70]">{renderProductDetail()}</motion.div>}
               {subView === 'checkout' && <motion.div key="check" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-[60]">{renderCheckout()}</motion.div>}
               {subView === 'addresses' && <motion.div key="address" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40">{renderAddresses()}</motion.div>}
               {subView === 'payments' && <motion.div key="pay" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40">{renderPayments()}</motion.div>}
