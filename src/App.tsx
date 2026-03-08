@@ -5,9 +5,15 @@ import { supabase } from './lib/supabase';
 function App() {
   const [view, setView] = useState<'onboarding' | 'login' | 'app'>('onboarding');
   const [tab, setTab] = useState<'home' | 'orders' | 'profile'>('home');
-  const [subView, setSubView] = useState<'none' | 'restaurant_list' | 'restaurant_menu' | 'product_detail' | 'checkout' | 'active_order' | 'addresses' | 'payments'>('none');
+  const [subView, setSubView] = useState<'none' | 'restaurant_list' | 'restaurant_menu' | 'product_detail' | 'checkout' | 'active_order' | 'addresses' | 'payments' | 'transit_selection'>('none');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [tempQuantity, setTempQuantity] = useState(1);
+  const [transitData, setTransitData] = useState({
+    origin: 'Rua Augusta, 45',
+    destination: '',
+    type: 'mototaxi' as 'mototaxi' | 'carro' | 'van' | 'utilitario',
+    estPrice: 0
+  });
 
   const [email, setEmail] = useState('cliente@exemplo.com');
   const [password, setPassword] = useState('senha123');
@@ -101,6 +107,7 @@ function App() {
       total_price: parseFloat(total.toFixed(2)),
       pickup_address: 'Restaurante Burger Premium • Av. Paulista, 1000',
       delivery_address: 'Rua Augusta, 45 - Consolação, São Paulo',
+      service_type: 'delivery'
     }).select().single();
 
     setIsLoading(false);
@@ -111,6 +118,37 @@ function App() {
       fetchMyOrders(userId);
     } else {
       alert("Erro ao criar pedido.");
+    }
+  };
+
+  const handleRequestTransit = async () => {
+    if (!userId || !transitData.destination) return;
+    setIsLoading(true);
+
+    // Simulating transit order with destination-based logic
+    let price = 0;
+    if (transitData.type === 'mototaxi') price = 12.5;
+    else if (transitData.type === 'carro') price = 22.0;
+    else if (transitData.type === 'utilitario') price = 35.0;
+    else if (transitData.type === 'van') price = 55.0;
+
+    const { data, error } = await supabase.from('orders_delivery').insert({
+      user_id: userId,
+      status: 'pendente',
+      total_price: price,
+      pickup_address: transitData.origin,
+      delivery_address: transitData.destination,
+      service_type: transitData.type
+    }).select().single();
+
+    setIsLoading(false);
+    if (!error) {
+      setSelectedItem(data);
+      setSubView('active_order');
+      fetchMyOrders(userId);
+      setTransitData({ ...transitData, destination: '' });
+    } else {
+      alert("Erro ao solicitar transporte.");
     }
   };
 
@@ -229,15 +267,19 @@ function App() {
         <div className="grid grid-cols-4 gap-4">
           {[
             { icon: 'restaurant', label: 'Comida', color: 'bg-orange-100 text-orange-600', action: () => setSubView('restaurant_list') },
+            { icon: 'motorcycle', label: 'MotoTáxi', color: 'bg-yellow-100 text-yellow-600', action: () => { setTransitData({ ...transitData, type: 'mototaxi' }); setSubView('transit_selection'); } },
+            { icon: 'directions_car', label: 'Motorista', color: 'bg-indigo-100 text-indigo-600', action: () => { setTransitData({ ...transitData, type: 'carro' }); setSubView('transit_selection'); } },
+            { icon: 'local_shipping', label: 'Fretes', color: 'bg-emerald-100 text-emerald-600', action: () => { setTransitData({ ...transitData, type: 'van' }); setSubView('transit_selection'); } },
+            { icon: 'package_2', label: 'Envios', color: 'bg-purple-100 text-purple-600' },
             { icon: 'shopping_cart', label: 'Mercado', color: 'bg-brand-100 text-brand-600' },
             { icon: 'medication', label: 'Farmácia', color: 'bg-blue-100 text-blue-600' },
-            { icon: 'package_2', label: 'Envios', color: 'bg-purple-100 text-purple-600' },
+            { icon: 'front_loader', label: 'Cargas', color: 'bg-slate-100 text-slate-600', action: () => { setTransitData({ ...transitData, type: 'utilitario' }); setSubView('transit_selection'); } },
           ].map((cat, i) => (
             <div key={i} onClick={cat.action} className="flex flex-col items-center gap-2 cursor-pointer active:scale-95 transition-transform">
               <div className={`w-[72px] h-[72px] rounded-[24px] flex items-center justify-center ${cat.color} shadow-soft`}>
                 <span className="material-symbols-rounded text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>{cat.icon}</span>
               </div>
-              <span className="text-xs font-bold text-slate-700">{cat.label}</span>
+              <span className="text-[10px] font-black uppercase tracking-tight text-slate-700">{cat.label}</span>
             </div>
           ))}
         </div>
@@ -266,7 +308,7 @@ function App() {
   );
 
   const renderRestaurantList = () => {
-    const filters = ['Todos', 'Entrega Grátis', 'Mais Rápidos', 'Top Avaliados'];
+    const filters = ['Todos', 'Hambúrguer', 'Pizza', 'Japonesa', 'Bebidas'];
 
     const restaurants = [
       { tag: 'Lanches', name: 'Burger Premium', rating: '4.9', time: '30-40 min', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=300&auto=format&fit=crop', freeDelivery: true, ratingVal: 4.9, timeVal: 35 },
@@ -295,18 +337,19 @@ function App() {
         {/* Smart Filters Bar */}
         <div className="px-6 mb-6">
           <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
-            {filters.map(f => (
-              <button
+            {filters.map((f) => (
+              <motion.button
+                whileTap={{ scale: 0.92 }}
                 key={f}
                 onClick={() => {
                   setLoadingRestaurants(true);
                   setActiveFilter(f);
                   setTimeout(() => setLoadingRestaurants(false), 800);
                 }}
-                className={`whitespace-now80 px-5 py-2.5 rounded-full text-xs font-black transition-all border ${activeFilter === f ? 'bg-brand-600 text-white border-brand-600 shadow-float' : 'bg-white text-slate-500 border-slate-100'}`}
+                className={`whitespace-nowrap px-6 py-3 rounded-full text-[11px] font-black transition-all border ${activeFilter === f ? 'bg-brand-600 text-white border-brand-600 shadow-float' : 'bg-white text-slate-500 border-slate-100'}`}
               >
                 {f}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
@@ -712,11 +755,13 @@ function App() {
 
           <div className="flex justify-between items-start mb-10">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-brand-600 mb-2">Pedido em Tempo Real</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-brand-600 mb-2">{selectedItem.total_price > 10 && selectedItem.total_price < 25 ? 'Viagem em Tempo Real' : 'Pedido em Tempo Real'}</p>
               <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Chega em -- min</h2>
             </div>
             <div className="bg-white p-3 rounded-[24px] shadow-soft border border-slate-100 flex items-center gap-3">
-              <span className="material-symbols-rounded text-brand-600 text-3xl">restaurant</span>
+              <span className="material-symbols-rounded text-brand-600 text-3xl">
+                {selectedItem.total_price === 12.5 ? 'motorcycle' : selectedItem.total_price === 22.0 ? 'directions_car' : 'restaurant'}
+              </span>
             </div>
           </div>
 
@@ -731,7 +776,7 @@ function App() {
               />
             </div>
             <div className="flex justify-between mt-4">
-              {['Recebido', 'Preparando', 'A Caminho', 'Entregue'].map((step, i) => (
+              {(selectedItem.total_price > 10 && selectedItem.total_price < 40 ? ['Solicitado', 'Confirmado', 'Em Curso', 'Finalizado'] : ['Recebido', 'Preparando', 'A Caminho', 'Entregue']).map((step, i) => (
                 <div key={i} className="flex flex-col items-center gap-2">
                   <div className={`w-3 h-3 rounded-full border-2 border-white shadow-soft transition-colors ${i <= currentStepIndex + 1 ? 'bg-brand-600' : 'bg-slate-300'}`}></div>
                   <span className={`text-[9px] font-black uppercase tracking-widest ${i <= currentStepIndex + 1 ? 'text-slate-900' : 'text-slate-400'}`}>{step}</span>
@@ -825,9 +870,139 @@ function App() {
     );
   };
 
+  const renderTransitSelection = () => (
+    <div className="absolute inset-0 z-[110] bg-background flex flex-col hide-scrollbar overflow-y-auto">
+      <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center justify-between gap-4 mb-4">
+        <button onClick={() => setSubView('none')} className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full shadow-soft active:scale-95 transition-transform text-slate-900 border border-slate-100">
+          <span className="material-symbols-rounded text-xl text-slate-700">arrow_back</span>
+          <span className="font-bold text-sm">Voltar</span>
+        </button>
+        <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">Pedir {transitData.type === 'mototaxi' ? 'MotoTáxi' : 'Motorista'}</h2>
+      </header>
+
+      <div className="px-6 space-y-6 flex-1">
+        {/* Destination Input Section */}
+        <div className="bg-white p-6 rounded-[32px] shadow-soft space-y-4 border border-slate-50">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-brand-50 rounded-full flex items-center justify-center">
+              <span className="material-symbols-rounded text-brand-600">my_location</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1 mb-1">Origem</p>
+              <input
+                type="text"
+                value={transitData.origin}
+                onChange={e => setTransitData({ ...transitData, origin: e.target.value })}
+                className="w-full bg-slate-50 border-none px-4 py-2.5 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-brand-500/20 outline-none"
+              />
+            </div>
+          </div>
+          <div className="h-px bg-slate-100 ml-14"></div>
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center">
+              <span className="material-symbols-rounded text-orange-600">location_on</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1 mb-1">Destino</p>
+              <input
+                autoFocus
+                type="text"
+                placeholder="Para onde vamos?"
+                value={transitData.destination}
+                onChange={e => {
+                  const dest = e.target.value;
+                  const price = dest.length > 3 ? (transitData.type === 'mototaxi' ? 8.5 : 15.0) + (dest.length * 0.5) : 0;
+                  setTransitData({ ...transitData, destination: dest, estPrice: price });
+                }}
+                className="w-full bg-slate-50 border-none px-4 py-2.5 rounded-xl text-sm font-bold text-slate-900 focus:ring-2 focus:ring-brand-500/20 outline-none placeholder:text-slate-300"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Vehicle Selection */}
+        <div className="space-y-4">
+          <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4">Opções Disponíveis</h3>
+
+          <div
+            onClick={() => setTransitData({ ...transitData, type: 'mototaxi' })}
+            className={`p-5 rounded-[32px] border-2 transition-all flex items-center gap-4 cursor-pointer active:scale-[0.98] ${transitData.type === 'mototaxi' ? 'bg-white border-brand-500 shadow-float' : 'bg-white border-transparent shadow-soft opacity-60'}`}
+          >
+            <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center text-yellow-600">
+              <span className="material-symbols-rounded text-4xl">motorcycle</span>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-black text-slate-900 text-base">MotoTáxi</h4>
+              <p className="text-[11px] font-bold text-slate-500 italic">Chega em 3 min • Rápido</p>
+            </div>
+            <div className="text-right">
+              <p className="font-black text-slate-900">R$ 12,50</p>
+            </div>
+          </div>
+
+          <div
+            onClick={() => setTransitData({ ...transitData, type: 'carro' })}
+            className={`p-5 rounded-[32px] border-2 transition-all flex items-center gap-4 cursor-pointer active:scale-[0.98] ${transitData.type === 'carro' ? 'bg-white border-indigo-500 shadow-float' : 'bg-white border-transparent shadow-soft opacity-60'}`}
+          >
+            <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600">
+              <span className="material-symbols-rounded text-4xl">directions_car</span>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-black text-slate-900 text-base">Particular Carro</h4>
+              <p className="text-[11px] font-bold text-slate-500 italic">Chega em 6 min • Conforto</p>
+            </div>
+            <div className="text-right">
+              <p className="font-black text-slate-900">R$ 22,00</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Suggestions */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-slate-50 p-4 rounded-[24px] border border-slate-100 cursor-pointer" onClick={() => setTransitData({ ...transitData, destination: 'Shopping Center' })}>
+            <span className="material-symbols-rounded text-slate-400 text-lg mb-2">mall</span>
+            <p className="text-[10px] font-black uppercase text-slate-500">Shopping</p>
+          </div>
+          <div className="bg-slate-50 p-4 rounded-[24px] border border-slate-100 cursor-pointer" onClick={() => setTransitData({ ...transitData, destination: 'Parque Ibirapuera' })}>
+            <span className="material-symbols-rounded text-slate-400 text-lg mb-2">park</span>
+            <p className="text-[10px] font-black uppercase text-slate-500">Parque</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6 pb-12 bg-white/80 backdrop-blur-md border-t border-slate-100 mt-auto">
+        <button
+          disabled={!transitData.destination || isLoading}
+          onClick={handleRequestTransit}
+          className="w-full bg-slate-900 text-white font-black text-lg py-5 rounded-[28px] shadow-float active:scale-[0.98] transition-all disabled:opacity-30 disabled:grayscale flex justify-center items-center gap-3"
+        >
+          {isLoading ? (
+            <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+          ) : (
+            <>
+              {transitData.destination ? `Confirmar ${transitData.type === 'mototaxi' ? 'Moto' : 'Carro'}` : 'Informe o Destino'}
+              <span className="material-symbols-rounded">arrow_forward</span>
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+
   const BottomNav = () => (
-    <div className="fixed bottom-6 left-6 right-6 z-30">
-      <div className="glass-panel flex justify-around items-center px-2 py-2 rounded-full shadow-float border border-white/40">
+    <div className="fixed bottom-8 left-6 right-6 z-30">
+      <div className="glass-panel flex justify-around items-center px-4 py-3 rounded-full shadow-float border border-white/40 relative">
+        {/* Active Tab Background Indicator */}
+        <motion.div
+          className="absolute h-12 rounded-full bg-brand-600/10 border border-brand-600/10 pointer-events-none"
+          initial={false}
+          animate={{
+            x: tab === 'home' ? '-115%' : tab === 'orders' ? '0%' : '115%',
+            width: '28%'
+          }}
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+        />
+
         {[
           { id: 'home', icon: 'home', label: 'Início', action: () => { setTab('home'); setSubView('none'); } },
           { id: 'orders', icon: 'receipt_long', label: 'Pedidos', action: () => { setTab('orders'); setSubView('none'); } },
@@ -836,10 +1011,23 @@ function App() {
           <button
             key={item.id}
             onClick={item.action}
-            className={`flex flex-col items-center justify-center w-20 h-16 rounded-full transition-all duration-300 ${tab === item.id ? 'bg-white shadow-soft scale-105' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`flex flex-col items-center justify-center w-24 h-12 relative z-10 transition-colors duration-300 ${tab === item.id ? 'text-brand-600' : 'text-slate-400'}`}
           >
-            <span className={`material-symbols-rounded ${tab === item.id ? 'text-brand-600' : ''}`} style={{ fontVariationSettings: tab === item.id ? "'FILL' 1" : "'FILL' 0" }}>{item.icon}</span>
-            {tab === item.id && <span className="text-[10px] font-bold text-slate-900 mt-1">{item.label}</span>}
+            <motion.span
+              whileTap={{ scale: 1.2 }}
+              className="material-symbols-rounded"
+              style={{ fontVariationSettings: tab === item.id ? "'FILL' 1" : "'FILL' 0" }}
+            >
+              {item.icon}
+            </motion.span>
+            {tab === item.id && (
+              <motion.span
+                layoutId="activeTabLabel"
+                className="text-[9px] font-black uppercase tracking-[0.1em] mt-1"
+              >
+                {item.label}
+              </motion.span>
+            )}
           </button>
         ))}
       </div>
@@ -865,6 +1053,7 @@ function App() {
               {subView === 'checkout' && <motion.div key="check" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-[60]">{renderCheckout()}</motion.div>}
               {subView === 'addresses' && <motion.div key="address" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40">{renderAddresses()}</motion.div>}
               {subView === 'payments' && <motion.div key="pay" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40">{renderPayments()}</motion.div>}
+              {subView === 'transit_selection' && <motion.div key="transit" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-[110]">{renderTransitSelection()}</motion.div>}
               {subView === 'active_order' && <motion.div key="aorder" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-[100]">{renderActiveOrder()}</motion.div>}
             </AnimatePresence>
 
