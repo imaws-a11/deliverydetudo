@@ -13,6 +13,8 @@ function App() {
   const [password, setPassword] = useState('senha123');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [loadingRestaurants, setLoadingRestaurants] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('Todos');
 
   const [activeDrivers, setActiveDrivers] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
@@ -93,19 +95,20 @@ function App() {
     setIsLoading(true);
     const total = cart.reduce((acc, item) => acc + item.price, 0) + 5.9; // 5.90 is delivery fee
 
-    const { error } = await supabase.from('orders_delivery').insert({
+    const { data, error } = await supabase.from('orders_delivery').insert({
       user_id: userId,
       status: 'pendente',
       total_price: parseFloat(total.toFixed(2)),
       pickup_address: 'Restaurante Burger Premium • Av. Paulista, 1000',
-      delivery_address: 'Casa • Rua Augusta, 45'
-    });
+      delivery_address: 'Rua Augusta, 45 - Consolação, São Paulo',
+    }).select().single();
 
     setIsLoading(false);
     if (!error) {
       setCart([]);
-      setTab('orders');
-      setSubView('none');
+      setSelectedItem(data); // Using selectedItem to store the current tracking order
+      setSubView('active_order');
+      fetchMyOrders(userId);
     } else {
       alert("Erro ao criar pedido.");
     }
@@ -200,6 +203,29 @@ function App() {
       </header>
 
       <div className="px-6 space-y-8">
+        {/* Active Order Tracking Widget */}
+        {myOrders.find(o => o.status !== 'concluido') && (
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={() => {
+              setSelectedItem(myOrders.find(o => o.status !== 'concluido'));
+              setSubView('active_order');
+            }}
+            className="bg-brand-600 rounded-[32px] p-5 flex items-center gap-4 shadow-float cursor-pointer relative overflow-hidden group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+              <span className="material-symbols-rounded text-white animate-bounce">local_shipping</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/60">Pedido em andamento</p>
+              <h4 className="text-white font-black text-lg tracking-tight">Rastrear Entrega ⚡</h4>
+            </div>
+            <span className="material-symbols-rounded text-white/40">chevron_right</span>
+          </motion.div>
+        )}
+
         <div className="grid grid-cols-4 gap-4">
           {[
             { icon: 'restaurant', label: 'Comida', color: 'bg-orange-100 text-orange-600', action: () => setSubView('restaurant_list') },
@@ -239,38 +265,102 @@ function App() {
     </div>
   );
 
-  const renderRestaurantList = () => (
-    <div className="absolute inset-0 z-40 bg-background flex flex-col hide-scrollbar overflow-y-auto pb-6">
-      <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center justify-between gap-4 mb-4">
-        <button onClick={() => setSubView('none')} className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full shadow-soft active:scale-95 transition-transform text-slate-900 border border-slate-100">
-          <span className="material-symbols-rounded text-xl text-slate-700">arrow_back</span>
-          <span className="font-bold text-sm">Voltar</span>
-        </button>
-        <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">Restaurantes</h2>
-      </header>
+  const renderRestaurantList = () => {
+    const filters = ['Todos', 'Entrega Grátis', 'Mais Rápidos', 'Top Avaliados'];
 
-      <div className="px-6 space-y-4">
-        {[
-          { tag: 'Lanches', name: 'Burger Premium', rating: '4.9', time: '30-40 min', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=300&auto=format&fit=crop' },
-          { tag: 'Japonesa', name: 'Sushi House', rating: '4.7', time: '40-50 min', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=300&auto=format&fit=crop' },
-          { tag: 'Pizza', name: 'Nossa Pizza', rating: '4.5', time: '20-30 min', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=300&auto=format&fit=crop' }
-        ].map((rest, i) => (
-          <div key={i} onClick={() => setSubView('restaurant_menu')} className="bg-white p-4 rounded-[32px] flex items-center gap-4 shadow-soft cursor-pointer active:scale-95 transition-transform border border-transparent hover:border-brand-500/20">
-            <div className="w-24 h-24 rounded-[24px] bg-slate-100 bg-cover bg-center" style={{ backgroundImage: `url('${rest.img}')` }}></div>
-            <div className="flex-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-2 py-1 rounded-full">{rest.tag}</span>
-              <h3 className="text-lg font-black text-slate-900 mt-2">{rest.name}</h3>
-              <div className="flex items-center gap-3 mt-1 text-sm font-bold text-slate-500">
-                <span className="flex items-center gap-1 text-amber-500"><span className="material-symbols-rounded text-base" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>{rest.rating}</span>
-                <span>•</span>
-                <span className="flex items-center gap-1"><span className="material-symbols-rounded text-base">schedule</span>{rest.time}</span>
-              </div>
-            </div>
+    const restaurants = [
+      { tag: 'Lanches', name: 'Burger Premium', rating: '4.9', time: '30-40 min', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=300&auto=format&fit=crop', freeDelivery: true, ratingVal: 4.9, timeVal: 35 },
+      { tag: 'Japonesa', name: 'Sushi House', rating: '4.7', time: '40-50 min', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=300&auto=format&fit=crop', freeDelivery: false, ratingVal: 4.7, timeVal: 45 },
+      { tag: 'Pizza', name: 'Nossa Pizza', rating: '4.5', time: '20-30 min', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=300&auto=format&fit=crop', freeDelivery: true, ratingVal: 4.5, timeVal: 25 }
+    ];
+
+    const filteredRestaurants = restaurants.filter(r => {
+      if (activeFilter === 'Todos') return true;
+      if (activeFilter === 'Entrega Grátis') return r.freeDelivery;
+      if (activeFilter === 'Mais Rápidos') return r.timeVal <= 35;
+      if (activeFilter === 'Top Avaliados') return r.ratingVal >= 4.7;
+      return true;
+    });
+
+    return (
+      <div className="absolute inset-0 z-40 bg-background flex flex-col hide-scrollbar overflow-y-auto pb-6">
+        <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center justify-between gap-4">
+          <button onClick={() => setSubView('none')} className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full shadow-soft active:scale-95 transition-transform text-slate-900 border border-slate-100">
+            <span className="material-symbols-rounded text-xl text-slate-700">arrow_back</span>
+            <span className="font-bold text-sm">Voltar</span>
+          </button>
+          <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">Restaurantes</h2>
+        </header>
+
+        {/* Smart Filters Bar */}
+        <div className="px-6 mb-6">
+          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
+            {filters.map(f => (
+              <button
+                key={f}
+                onClick={() => {
+                  setLoadingRestaurants(true);
+                  setActiveFilter(f);
+                  setTimeout(() => setLoadingRestaurants(false), 800);
+                }}
+                className={`whitespace-now80 px-5 py-2.5 rounded-full text-xs font-black transition-all border ${activeFilter === f ? 'bg-brand-600 text-white border-brand-600 shadow-float' : 'bg-white text-slate-500 border-slate-100'}`}
+              >
+                {f}
+              </button>
+            ))}
           </div>
-        ))}
+        </div>
+
+        <div className="px-6 space-y-4">
+          {loadingRestaurants ? (
+            // Skeleton Screens
+            Array(4).fill(0).map((_, i) => (
+              <div key={i} className="bg-white p-4 rounded-[32px] flex items-center gap-4 shadow-soft animate-pulse">
+                <div className="w-24 h-24 rounded-[24px] bg-slate-100"></div>
+                <div className="flex-1 space-y-3">
+                  <div className="w-20 h-4 bg-slate-100 rounded-full"></div>
+                  <div className="w-40 h-6 bg-slate-100 rounded-full"></div>
+                  <div className="w-32 h-4 bg-slate-100 rounded-full"></div>
+                </div>
+              </div>
+            ))
+          ) : (
+            filteredRestaurants.map((rest, i) => (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                key={i}
+                onClick={() => setSubView('restaurant_menu')}
+                className="bg-white p-4 rounded-[32px] flex items-center gap-4 shadow-soft cursor-pointer active:scale-95 transition-transform border border-transparent hover:border-brand-500/20"
+              >
+                <div className="w-24 h-24 rounded-[24px] bg-slate-100 bg-cover bg-center" style={{ backgroundImage: `url('${rest.img}')` }}></div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-2 py-1 rounded-full">{rest.tag}</span>
+                    {rest.freeDelivery && <span className="text-[9px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-full uppercase">Entrega Grátis</span>}
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900 mt-2">{rest.name}</h3>
+                  <div className="flex items-center gap-3 mt-1 text-sm font-bold text-slate-500">
+                    <span className="flex items-center gap-1 text-amber-500"><span className="material-symbols-rounded text-base" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>{rest.rating}</span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1"><span className="material-symbols-rounded text-base">schedule</span>{rest.time}</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          )}
+          {!loadingRestaurants && filteredRestaurants.length === 0 && (
+            <div className="py-20 text-center opacity-40">
+              <span className="material-symbols-rounded text-5xl mb-4">search_off</span>
+              <p className="font-bold">Nenhum restaurante encontrado.</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
 
   const renderRestaurantMenu = () => (
     <div className="absolute inset-0 z-50 bg-background flex flex-col hide-scrollbar overflow-y-auto">
@@ -333,13 +423,26 @@ function App() {
 
       {cart.length > 0 && (
         <div className="fixed bottom-6 left-6 right-6 z-50">
-          <button onClick={() => setSubView('checkout')} className="w-full bg-slate-900 text-white p-4 rounded-[28px] shadow-float flex items-center justify-between active:scale-[0.98] transition-transform">
+          <motion.button
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setSubView('checkout')}
+            className="w-full bg-slate-900 text-white p-4 rounded-[28px] shadow-float flex items-center justify-between active:scale-[0.98] transition-all"
+          >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-[16px] flex items-center justify-center font-black">{cart.length}</div>
+              <motion.div
+                key={cart.length}
+                initial={{ scale: 0.5 }}
+                animate={{ scale: 1 }}
+                className="w-10 h-10 bg-white/20 rounded-[16px] flex items-center justify-center font-black"
+              >
+                {cart.length}
+              </motion.div>
               <span className="font-bold">Ver Carrinho</span>
             </div>
             <span className="font-black text-lg">R$ {cart.reduce((a, b) => a + b.price, 0).toFixed(2).replace('.', ',')}</span>
-          </button>
+          </motion.button>
         </div>
       )}
     </div>
@@ -574,6 +677,100 @@ function App() {
     </div>
   );
 
+  const renderActiveOrder = () => {
+    if (!selectedItem) return null;
+    const statusSteps = ['pendente', 'a_caminho', 'concluido'];
+    const currentStepIndex = statusSteps.indexOf(selectedItem.status);
+
+    return (
+      <div className="absolute inset-0 z-[100] bg-[#F4F5F7] flex flex-col hide-scrollbar overflow-y-auto">
+        {/* Map Header Simulation */}
+        <div className="relative w-full h-[45vh] bg-slate-200 overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center grayscale contrast-75 brightness-90 animate-slow-zoom"
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop')" }}
+          ></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-[#F4F5F7]"></div>
+
+          <button onClick={() => setSubView('none')} className="absolute top-8 left-6 z-10 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform text-slate-900">
+            <span className="material-symbols-rounded">close</span>
+          </button>
+
+          {/* Simulated Markers */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="relative">
+              {/* Pulsing delivery path/point */}
+              <div className="w-4 h-4 bg-brand-600 rounded-full animate-ping absolute"></div>
+              <div className="w-4 h-4 bg-brand-600 rounded-full relative shadow-lg ring-4 ring-white"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Status Content */}
+        <div className="flex-1 -mt-10 bg-[#F4F5F7] rounded-t-[40px] px-8 pt-10 pb-32 relative z-20 shadow-[-20px_0_40px_rgba(0,0,0,0.05)]">
+          <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-8 opacity-30"></div>
+
+          <div className="flex justify-between items-start mb-10">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-brand-600 mb-2">Pedido em Tempo Real</p>
+              <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Chega em -- min</h2>
+            </div>
+            <div className="bg-white p-3 rounded-[24px] shadow-soft border border-slate-100 flex items-center gap-3">
+              <span className="material-symbols-rounded text-brand-600 text-3xl">restaurant</span>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="relative mb-12">
+            <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-brand-600"
+                initial={{ width: '0%' }}
+                animate={{ width: `${(currentStepIndex + 1) * 33.3}%` }}
+                transition={{ duration: 1 }}
+              />
+            </div>
+            <div className="flex justify-between mt-4">
+              {['Recebido', 'Preparando', 'A Caminho', 'Entregue'].map((step, i) => (
+                <div key={i} className="flex flex-col items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full border-2 border-white shadow-soft transition-colors ${i <= currentStepIndex + 1 ? 'bg-brand-600' : 'bg-slate-300'}`}></div>
+                  <span className={`text-[9px] font-black uppercase tracking-widest ${i <= currentStepIndex + 1 ? 'text-slate-900' : 'text-slate-400'}`}>{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Driver Card */}
+          <div className="bg-white rounded-[32px] p-6 shadow-soft border border-slate-50 flex items-center gap-5">
+            <div className="w-16 h-16 bg-slate-100 rounded-[20px] overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-black text-lg text-slate-900">{selectedItem.driver_id ? 'José da Silva' : 'Buscando Entregador...'}</h4>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{selectedItem.driver_id ? 'Honda CG 160 • ABC-1234' : 'Aguarde um momento'}</p>
+            </div>
+            {selectedItem.driver_id && (
+              <button className="w-12 h-12 bg-brand-50 text-brand-600 rounded-full flex items-center justify-center active:scale-95 transition-transform shadow-soft">
+                <span className="material-symbols-rounded">call</span>
+              </button>
+            )}
+          </div>
+
+          {/* Order Summary Summary */}
+          <div className="mt-8 space-y-4">
+            <div className="flex justify-between items-center bg-slate-50 p-5 rounded-[24px] border border-slate-100">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-rounded text-slate-400">location_on</span>
+                <p className="text-sm font-bold text-slate-600 truncate max-w-[200px]">{selectedItem.delivery_address}</p>
+              </div>
+              <span className="font-black text-slate-900 tracking-tighter">R$ {selectedItem.total_price}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderProductDetail = () => {
     if (!selectedItem) return null;
     return (
@@ -668,6 +865,7 @@ function App() {
               {subView === 'checkout' && <motion.div key="check" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-[60]">{renderCheckout()}</motion.div>}
               {subView === 'addresses' && <motion.div key="address" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40">{renderAddresses()}</motion.div>}
               {subView === 'payments' && <motion.div key="pay" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40">{renderPayments()}</motion.div>}
+              {subView === 'active_order' && <motion.div key="aorder" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-[100]">{renderActiveOrder()}</motion.div>}
             </AnimatePresence>
 
             <BottomNav />
