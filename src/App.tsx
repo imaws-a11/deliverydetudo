@@ -9,6 +9,7 @@ function App() {
   const [activeService, setActiveService] = useState<any>(null);
   const [selectedShop, setSelectedShop] = useState<any>(null);
   const [activeMenuCategory, setActiveMenuCategory] = useState('Destaques');
+  const [selectedFoodCategory, setSelectedFoodCategory] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [tempQuantity, setTempQuantity] = useState(1);
   const [transitData, setTransitData] = useState({
@@ -23,9 +24,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [loadingRestaurants, setLoadingRestaurants] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('Todos');
 
-  const [activeDrivers, setActiveDrivers] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [myOrders, setMyOrders] = useState<any[]>([]);
   const [cart, setCart] = useState<any[]>([]);
@@ -292,7 +291,11 @@ function App() {
     const handleServiceSelection = (cat: any) => {
       if (cat.action) return cat.action();
       setActiveService(cat);
-      setSubView('generic_list');
+      if (cat.type === 'restaurant') {
+        setSubView('restaurant_list');
+      } else {
+        setSubView('generic_list');
+      }
     };
 
     return (
@@ -583,98 +586,115 @@ function App() {
   };
 
   const renderRestaurantList = () => {
-    const filters = ['Todos', 'Hambúrguer', 'Pizza', 'Japonesa', 'Bebidas'];
-
-    const restaurants = [
-      { tag: 'Lanches', name: 'Burger Premium', rating: '4.9', time: '30-40 min', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=300&auto=format&fit=crop', freeDelivery: true, ratingVal: 4.9, timeVal: 35 },
-      { tag: 'Japonesa', name: 'Sushi House', rating: '4.7', time: '40-50 min', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=300&auto=format&fit=crop', freeDelivery: false, ratingVal: 4.7, timeVal: 45 },
-      { tag: 'Pizza', name: 'Nossa Pizza', rating: '4.5', time: '20-30 min', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=300&auto=format&fit=crop', freeDelivery: true, ratingVal: 4.5, timeVal: 25 }
+    const foodCategories = [
+      { id: 'hamburguer', name: 'Hamburguerias', img: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=400' },
+      { id: 'pizza', name: 'Pizzas', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400' },
+      { id: 'japonesa', name: 'Japonesa', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=400' },
+      { id: 'acai', name: 'Açaí', img: 'https://images.unsplash.com/photo-1590301157890-48109335cf73?q=80&w=400' },
+      { id: 'bares', name: 'Bares & Drinks', img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=400' },
+      { id: 'brasileira', name: 'Brasileira', img: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=400' },
+      { id: 'doces', name: 'Doces & Bolos', img: 'https://images.unsplash.com/photo-1535141192574-5d4897c12636?q=80&w=400' },
     ];
 
-    const filteredRestaurants = restaurants.filter(r => {
-      if (activeFilter === 'Todos') return true;
-      if (activeFilter === 'Entrega Grátis') return r.freeDelivery;
-      if (activeFilter === 'Mais Rápidos') return r.timeVal <= 35;
-      if (activeFilter === 'Top Avaliados') return r.ratingVal >= 4.7;
-      return true;
-    });
+    const allRestaurants = [
+      { tag: 'Lanches', type: 'hamburguer', name: 'Burger Premium', rating: '4.9', time: '30-40 min', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=300', freeDelivery: true, ratingVal: 4.9, timeVal: 35 },
+      { tag: 'Japonesa', type: 'japonesa', name: 'Sushi House', rating: '4.7', time: '40-50 min', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?q=80&w=300', freeDelivery: false, ratingVal: 4.7, timeVal: 45 },
+      { tag: 'Pizza', type: 'pizza', name: 'Nossa Pizza', rating: '4.5', time: '20-30 min', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=300', freeDelivery: true, ratingVal: 4.5, timeVal: 25 },
+      { tag: 'Açaí', type: 'acai', name: 'Açaí do Porto', rating: '4.8', time: '15-25 min', img: 'https://images.unsplash.com/photo-1590301157890-48109335cf73?q=80&w=300', freeDelivery: true, ratingVal: 4.8, timeVal: 20 },
+      { tag: 'Bares', type: 'bares', name: 'The Pub Central', rating: '4.6', time: '20-35 min', img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=300', freeDelivery: false, ratingVal: 4.6, timeVal: 25 }
+    ];
+
+    const filteredRestaurants = selectedFoodCategory
+      ? allRestaurants.filter(r => r.type === selectedFoodCategory)
+      : [];
 
     return (
-      <div className="absolute inset-0 z-40 bg-background flex flex-col hide-scrollbar overflow-y-auto pb-6">
+      <div className="absolute inset-0 z-40 bg-[#f8f9fc] flex flex-col hide-scrollbar overflow-y-auto pb-6">
         <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center justify-between gap-4">
-          <button onClick={() => setSubView('none')} className="flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-2.5 rounded-full shadow-soft active:scale-95 transition-transform text-slate-900 border border-slate-100">
+          <button
+            onClick={() => {
+              if (selectedFoodCategory) setSelectedFoodCategory(null);
+              else setSubView('none');
+            }}
+            className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-full shadow-sm active:scale-95 transition-transform text-slate-900 border border-slate-100"
+          >
             <span className="material-symbols-rounded text-xl text-slate-700">arrow_back</span>
             <span className="font-bold text-sm">Voltar</span>
           </button>
-          <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">Restaurantes</h2>
+          <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">
+            {selectedFoodCategory ? foodCategories.find(c => c.id === selectedFoodCategory)?.name : 'Categorias de Comida'}
+          </h2>
         </header>
 
-        {/* Smart Filters Bar */}
-        <div className="px-6 mb-6">
-          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2">
-            {filters.map((f) => (
-              <motion.button
-                whileTap={{ scale: 0.92 }}
-                key={f}
-                onClick={() => {
-                  setLoadingRestaurants(true);
-                  setActiveFilter(f);
-                  setTimeout(() => setLoadingRestaurants(false), 800);
-                }}
-                className={`whitespace-nowrap px-6 py-3 rounded-full text-[11px] font-black transition-all border ${activeFilter === f ? 'bg-brand-600 text-white border-brand-600 shadow-float' : 'bg-white text-slate-500 border-slate-100'}`}
-              >
-                {f}
-              </motion.button>
-            ))}
-          </div>
-        </div>
-
-        <div className="px-6 space-y-4">
-          {loadingRestaurants ? (
-            // Skeleton Screens
-            Array(4).fill(0).map((_, i) => (
-              <div key={i} className="bg-white p-4 rounded-[32px] flex items-center gap-4 shadow-soft animate-pulse">
-                <div className="w-24 h-24 rounded-[24px] bg-slate-100"></div>
-                <div className="flex-1 space-y-3">
-                  <div className="w-20 h-4 bg-slate-100 rounded-full"></div>
-                  <div className="w-40 h-6 bg-slate-100 rounded-full"></div>
-                  <div className="w-32 h-4 bg-slate-100 rounded-full"></div>
-                </div>
-              </div>
-            ))
-          ) : (
-            filteredRestaurants.map((rest, i) => (
+        {!selectedFoodCategory ? (
+          <div className="px-6 pt-4 grid grid-cols-1 gap-4">
+            {foodCategories.map((cat, i) => (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                key={i}
-                onClick={() => handleShopClick(rest)}
-                className="bg-white p-4 rounded-[32px] flex items-center gap-4 shadow-soft cursor-pointer active:scale-95 transition-transform border border-transparent hover:border-brand-500/20"
+                key={cat.id}
+                onClick={() => {
+                  setLoadingRestaurants(true);
+                  setSelectedFoodCategory(cat.id);
+                  setTimeout(() => setLoadingRestaurants(false), 500);
+                }}
+                className="relative h-32 rounded-[32px] overflow-hidden shadow-sm active:scale-[0.98] transition-all cursor-pointer group"
               >
-                <div className="w-24 h-24 rounded-[24px] bg-slate-100 bg-cover bg-center" style={{ backgroundImage: `url('${rest.img}')` }}></div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-2 py-1 rounded-full">{rest.tag}</span>
-                    {rest.freeDelivery && <span className="text-[9px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-full uppercase">Entrega Grátis</span>}
-                  </div>
-                  <h3 className="text-lg font-black text-slate-900 mt-2">{rest.name}</h3>
-                  <div className="flex items-center gap-3 mt-1 text-sm font-bold text-slate-500">
-                    <span className="flex items-center gap-1 text-amber-500"><span className="material-symbols-rounded text-base" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>{rest.rating}</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1"><span className="material-symbols-rounded text-base">schedule</span>{rest.time}</span>
-                  </div>
+                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url('${cat.img}')` }}></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+                <div className="absolute inset-0 flex items-center px-8">
+                  <h3 className="text-white text-2xl font-black tracking-tight">{cat.name}</h3>
                 </div>
               </motion.div>
-            ))
-          )}
-          {!loadingRestaurants && filteredRestaurants.length === 0 && (
-            <div className="py-20 text-center opacity-40">
-              <span className="material-symbols-rounded text-5xl mb-4">search_off</span>
-              <p className="font-bold">Nenhum restaurante encontrado.</p>
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="px-6 pt-4 space-y-4">
+            {loadingRestaurants ? (
+              Array(3).fill(0).map((_, i) => (
+                <div key={i} className="bg-white p-4 rounded-[40px] flex items-center gap-4 animate-pulse">
+                  <div className="w-24 h-24 rounded-[24px] bg-slate-100"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="w-20 h-4 bg-slate-100 rounded-full"></div>
+                    <div className="w-40 h-6 bg-slate-100 rounded-full"></div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              filteredRestaurants.map((rest, i) => (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  key={i}
+                  onClick={() => handleShopClick(rest)}
+                  className="bg-white p-4 rounded-[40px] flex items-center gap-4 shadow-sm border border-slate-50 cursor-pointer active:scale-95 transition-transform"
+                >
+                  <div className="w-24 h-24 rounded-[32px] bg-cover bg-center" style={{ backgroundImage: `url('${rest.img}')` }}></div>
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <span className="text-[10px] font-black uppercase text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">{rest.tag}</span>
+                      <div className="flex items-center gap-1 text-amber-500 font-black text-xs">
+                        <span className="material-symbols-rounded text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                        {rest.rating}
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-black text-slate-900 mt-1">{rest.name}</h3>
+                    <p className="text-xs font-bold text-slate-400 mt-0.5">{rest.time} • {rest.freeDelivery ? 'Entrega Grátis' : 'Taxa R$ 5,90'}</p>
+                  </div>
+                </motion.div>
+              ))
+            )}
+            {!loadingRestaurants && filteredRestaurants.length === 0 && (
+              <div className="text-center py-20 opacity-40">
+                <span className="material-symbols-rounded text-6xl mb-4">storefront</span>
+                <p className="font-bold">Nenhum estabelecimento nesta categoria.</p>
+                <button onClick={() => setSelectedFoodCategory(null)} className="mt-4 text-brand-600 font-black">Ver outras categorias</button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   };
