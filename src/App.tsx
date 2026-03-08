@@ -5,7 +5,10 @@ import { supabase } from './lib/supabase';
 function App() {
   const [view, setView] = useState<'onboarding' | 'login' | 'app'>('onboarding');
   const [tab, setTab] = useState<'home' | 'orders' | 'profile'>('home');
-  const [subView, setSubView] = useState<'none' | 'restaurant_list' | 'restaurant_menu' | 'product_detail' | 'checkout' | 'active_order' | 'addresses' | 'payments' | 'transit_selection'>('none');
+  const [subView, setSubView] = useState<'none' | 'restaurant_list' | 'restaurant_menu' | 'product_detail' | 'checkout' | 'active_order' | 'addresses' | 'payments' | 'transit_selection' | 'generic_list'>('none');
+  const [activeService, setActiveService] = useState<any>(null);
+  const [selectedShop, setSelectedShop] = useState<any>(null);
+  const [activeMenuCategory, setActiveMenuCategory] = useState('Destaques');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [tempQuantity, setTempQuantity] = useState(1);
   const [transitData, setTransitData] = useState({
@@ -218,94 +221,366 @@ function App() {
     </div>
   );
 
-  const renderHome = () => (
-    <div className="flex flex-col h-full bg-background overflow-y-auto hide-scrollbar pb-32">
-      <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] mb-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <p className="text-xs font-bold text-brand-600 uppercase tracking-wider mb-1">Entregar em</p>
-            <div className="flex items-center gap-1 cursor-pointer">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Casa • Rua Augusta, 45</h3>
-              <span className="material-symbols-rounded text-slate-400">keyboard_arrow_down</span>
+  const handleShopClick = (shop: any) => {
+    // Initialize shop with categorized mock data based on type
+    let categorizedShop = { ...shop, categories: [] as any[] };
+    const serviceType = activeService?.type || 'restaurant';
+
+    if (serviceType === 'beverages') {
+      categorizedShop.categories = [
+        { name: 'Cervejas', items: [{ id: 501, name: 'Heineken 600ml', price: 12.50, desc: 'Cerveja premium gelada.' }, { id: 502, name: 'IPA Artesanal', price: 24.90, desc: 'Cerveja forte lupulada.' }] },
+        { name: 'Destilados', items: [{ id: 503, name: 'Whisky Black Label', price: 189.00, desc: 'Original 750ml.' }, { id: 504, name: 'Gin Tanqueray', price: 110.00, desc: 'Ideal para drinks.' }] },
+        { name: 'Não Alcoólicas', items: [{ id: 505, name: 'Coca-Cola 2L', price: 9.90, desc: 'Família em dobro.' }, { id: 506, name: 'Suco de Laranja', price: 14.00, desc: 'Integral 1L.' }] },
+        { name: 'Churrasco', items: [{ id: 507, name: 'Carvão 5kg', price: 22.00, desc: 'Eucalipto premium.' }, { id: 508, name: 'Sal Grosso', price: 4.50, desc: 'Temperado com ervas.' }] }
+      ];
+    } else if (serviceType === 'market') {
+      categorizedShop.categories = [
+        { name: 'Mercearia', items: [{ id: 201, name: 'Leite Integral 1L', price: 5.90, desc: 'Leite tipo A.' }, { id: 202, name: 'Arroz 5kg', price: 28.50, desc: 'Agulhinha tipo 1.' }] },
+        { name: 'Higiene', items: [{ id: 203, name: 'Shampoo Care', price: 18.90, desc: 'Brilho e maciez.' }, { id: 204, name: 'Pasta de Dente', price: 5.50, desc: 'Proteção total.' }] },
+        { name: 'Limpeza', items: [{ id: 205, name: 'Detergente 500ml', price: 2.80, desc: 'Controle de gordura.' }, { id: 206, name: 'Sabão em Pó 1kg', price: 15.90, desc: 'Brancura impecável.' }] }
+      ];
+    } else if (serviceType === 'pharmacy') {
+      categorizedShop.categories = [
+        { name: 'Medicamentos', items: [{ id: 303, name: 'Analgésico', price: 5.50, desc: 'Alívio rápido.' }, { id: 304, name: 'Anti-inflamatório', price: 12.90, desc: 'Eficácia comprovada.' }] },
+        { name: 'Higiene', items: [{ id: 305, name: 'Sabonete Líquido', price: 8.90, desc: 'Neutro para peles sensíveis.' }, { id: 306, name: 'Desodorante Roll-on', price: 11.50, desc: 'Proteção 48h.' }] },
+        { name: 'Bem-estar', items: [{ id: 301, name: 'Vitamina C', price: 18.20, desc: '10 comprimidos.' }, { id: 302, name: 'Protetor Solar', price: 45.90, desc: 'FPS 50.' }] }
+      ];
+    } else if (serviceType === 'pet') {
+      categorizedShop.categories = [
+        { name: 'Rações', items: [{ id: 401, name: 'Ração Golden 3kg', price: 54.90, desc: 'Carne e arroz.' }, { id: 403, name: 'Snack Dog', price: 8.50, desc: 'Petisco natural.' }] },
+        { name: 'Higiene Pet', items: [{ id: 405, name: 'Shampoo para Cães', price: 22.90, desc: 'Para pelos claros.' }, { id: 406, name: 'Areia Sanitária Gato', price: 19.90, desc: 'Alta absorção.' }] },
+        { name: 'Brinquedos', items: [{ id: 402, name: 'Brinquedo Mordedor', price: 15.00, desc: 'Borracha durável.' }, { id: 404, name: 'Bolinha Colorida', price: 5.00, desc: 'Diversão garantida.' }] }
+      ];
+    } else {
+      // Default to Restaurant Categorization
+      categorizedShop.categories = [
+        { name: 'Populares', items: [{ id: 1, name: 'Double Smash Burger', desc: 'Sabor marcante e suculento.', price: 34.90 }, { id: 3, name: 'Fritas com Cheddar', desc: 'Porção generosa com bacon.', price: 22.00 }] },
+        { name: 'Pratos', items: [{ id: 2, name: 'Combo Classic', desc: 'Completo com fritas e refri.', price: 42.50 }, { id: 10, name: 'Strogonoff de Frango', desc: 'Acompanha arroz e batata palha.', price: 38.00 }] },
+        { name: 'Bebidas', items: [{ id: 11, name: 'Refrigerante Lata', desc: '350ml bem gelado.', price: 6.50 }, { id: 12, name: 'Suco Natural', price: 12.00, desc: 'Laranja ou Limão.' }] }
+      ];
+    }
+
+    setSelectedShop(categorizedShop);
+    setActiveMenuCategory(categorizedShop.categories[0]?.name || 'Populares');
+    setSubView('restaurant_menu');
+  };
+
+  const renderHome = () => {
+    const promotions = [
+      { id: 1, title: 'Cupom R$20', desc: 'Em todo o setor de Mercado', code: 'MARKET20', color: 'bg-emerald-600', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=400' },
+      { id: 2, title: 'Frete Grátis', desc: 'Primeira compra em Farmácia', code: 'FARMAFREE', color: 'bg-blue-600', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400' },
+      { id: 3, title: 'Pet Friday', desc: '30% OFF em acessários pet', code: 'PET30', color: 'bg-rose-600', img: 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=400' }
+    ];
+
+    const bestSellers = [
+      { id: 101, name: 'Combo Whopper', shop: 'Burger King', price: 34.90, img: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=300' },
+      { id: 102, name: 'Cerveja Heineken 600ml', shop: 'Adega Central', price: 12.50, img: 'https://images.unsplash.com/photo-1618886614638-80e3c103d31a?q=80&w=300' },
+      { id: 103, name: 'Ração Royal Canin 1kg', shop: 'Petz Store', price: 89.90, img: 'https://images.unsplash.com/photo-1589924691106-073b19f5538d?q=80&w=300' },
+    ];
+
+    const categories = [
+      { icon: 'restaurant', label: 'Comida', color: 'bg-orange-100 text-orange-600', type: 'restaurant' },
+      { icon: 'shopping_cart', label: 'Mercado', color: 'bg-emerald-100 text-emerald-600', type: 'market' },
+      { icon: 'medication', label: 'Farmácia', color: 'bg-blue-100 text-blue-600', type: 'pharmacy' },
+      { icon: 'pets', label: 'Pet Shop', color: 'bg-rose-100 text-rose-600', type: 'pet' },
+      { icon: 'wine_bar', label: 'Bebidas', color: 'bg-amber-100 text-amber-600', type: 'beverages' },
+      { icon: 'motorcycle', label: 'MotoTáxi', color: 'bg-yellow-100 text-yellow-600', action: () => { setTransitData({ ...transitData, type: 'mototaxi' }); setSubView('transit_selection'); } },
+      { icon: 'directions_car', label: 'Motorista', color: 'bg-indigo-100 text-indigo-600', action: () => { setTransitData({ ...transitData, type: 'carro' }); setSubView('transit_selection'); } },
+      { icon: 'local_shipping', label: 'Entregas', color: 'bg-slate-100 text-slate-600', action: () => { setTransitData({ ...transitData, type: 'van' }); setSubView('transit_selection'); } },
+    ];
+
+    const handleServiceSelection = (cat: any) => {
+      if (cat.action) return cat.action();
+      setActiveService(cat);
+      setSubView('generic_list');
+    };
+
+    return (
+      <div className="flex flex-col h-full bg-[#f8f9fc] overflow-y-auto hide-scrollbar pb-32">
+        <header className="px-6 py-6 sticky top-0 z-30 glass-panel border-b-0 rounded-b-[40px] mb-2">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-black text-xs shadow-lg border-2 border-white">
+                JS
+              </div>
+              <div>
+                <p className="text-[9px] font-black text-brand-600 uppercase tracking-[0.2em] mb-0.5">Entregar em</p>
+                <div className="flex items-center gap-1 cursor-pointer">
+                  <h3 className="text-sm font-black text-slate-900 tracking-tight">Rua Augusta, 45</h3>
+                  <span className="material-symbols-rounded text-slate-400 text-lg">expand_more</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <div className="w-11 h-11 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center relative cursor-pointer active:scale-95 transition-transform">
+                <span className="material-symbols-rounded text-slate-400">favorite</span>
+              </div>
+              <div className="w-11 h-11 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center relative cursor-pointer active:scale-95 transition-transform">
+                <span className="material-symbols-rounded text-slate-900" style={{ fontVariationSettings: "'FILL' 1" }}>notifications</span>
+                <div className="absolute top-3.5 right-3.5 w-1.5 h-1.5 bg-brand-500 rounded-full ring-2 ring-white"></div>
+              </div>
             </div>
           </div>
-          <div className="w-12 h-12 bg-white rounded-full shadow-soft flex items-center justify-center relative cursor-pointer active:scale-95 transition-transform">
-            <span className="material-symbols-rounded text-slate-600" style={{ fontVariationSettings: "'FILL' 1" }}>notifications</span>
-            <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></div>
+          <div className="relative group">
+            <span className="material-symbols-rounded absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-brand-600">search</span>
+            <input type="text" placeholder="O que você precisa agora?" className="w-full pl-14 pr-6 py-4.5 bg-slate-100/50 border border-slate-200/50 rounded-[28px] focus:bg-white focus:border-brand-500/20 focus:ring-4 focus:ring-brand-500/5 outline-none font-bold text-slate-900 transition-all placeholder:text-slate-400 placeholder:font-bold" />
           </div>
-        </div>
-        <div className="relative">
-          <span className="material-symbols-rounded absolute left-5 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-          <input type="text" placeholder="Pratos, restaurantes..." className="w-full pl-14 pr-6 py-4 bg-white/60 border border-white rounded-[24px] shadow-soft focus:bg-white focus:ring-2 focus:ring-brand-500 outline-none font-medium text-slate-900 transition-all placeholder:text-slate-400" />
-        </div>
-      </header>
+        </header>
 
-      <div className="px-6 space-y-8">
-        {/* Active Order Tracking Widget */}
-        {myOrders.find(o => o.status !== 'concluido') && (
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            onClick={() => {
-              setSelectedItem(myOrders.find(o => o.status !== 'concluido'));
-              setSubView('active_order');
-            }}
-            className="bg-brand-600 rounded-[32px] p-5 flex items-center gap-4 shadow-float cursor-pointer relative overflow-hidden group"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
-              <span className="material-symbols-rounded text-white animate-bounce">local_shipping</span>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          {/* Active Order Tracking Widget */}
+          {myOrders.find(o => !['concluido', 'cancelado'].includes(orderStatuses[o.status] || o.status)) && (
+            <div className="px-6">
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                onClick={() => {
+                  setSelectedItem(myOrders.find(o => !['concluido', 'cancelado'].includes(orderStatuses[o.status] || o.status)));
+                  setSubView('active_order');
+                }}
+                className="bg-slate-900 rounded-[32px] p-5 flex items-center gap-4 shadow-2xl shadow-slate-900/20 cursor-pointer relative overflow-hidden group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                <div className="w-14 h-14 bg-brand-500 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/20">
+                  <span className="material-symbols-rounded text-slate-900 animate-bounce font-black">delivery_dining</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-1">Status do Pedido</p>
+                  <h4 className="text-white font-black text-md tracking-tight">Motorista à caminho ⚡</h4>
+                </div>
+                <button className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
+                  <span className="material-symbols-rounded">chevron_right</span>
+                </button>
+              </motion.div>
             </div>
-            <div className="flex-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/60">Pedido em andamento</p>
-              <h4 className="text-white font-black text-lg tracking-tight">Rastrear Entrega ⚡</h4>
+          )}
+
+          {/* Service Grid - Compact & Smooth */}
+          <div className="px-6">
+            <div className="grid grid-cols-4 gap-y-6 gap-x-2">
+              {categories.map((cat, i) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  key={i}
+                  onClick={() => handleServiceSelection(cat)}
+                  className="flex flex-col items-center gap-3 cursor-pointer active:scale-95 transition-all group"
+                >
+                  <div className={`w-[68px] h-[68px] rounded-[26px] flex items-center justify-center ${cat.color} shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all border border-white/50`}>
+                    <span className="material-symbols-rounded text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>{cat.icon}</span>
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 text-center w-full px-1">{cat.label}</span>
+                </motion.div>
+              ))}
             </div>
-            <span className="material-symbols-rounded text-white/40">chevron_right</span>
-          </motion.div>
-        )}
+          </div>
 
-        <div className="grid grid-cols-4 gap-4">
-          {[
-            { icon: 'restaurant', label: 'Comida', color: 'bg-orange-100 text-orange-600', action: () => setSubView('restaurant_list') },
-            { icon: 'motorcycle', label: 'MotoTáxi', color: 'bg-yellow-100 text-yellow-600', action: () => { setTransitData({ ...transitData, type: 'mototaxi' }); setSubView('transit_selection'); } },
-            { icon: 'directions_car', label: 'Motorista', color: 'bg-indigo-100 text-indigo-600', action: () => { setTransitData({ ...transitData, type: 'carro' }); setSubView('transit_selection'); } },
-            { icon: 'local_shipping', label: 'Fretes', color: 'bg-emerald-100 text-emerald-600', action: () => { setTransitData({ ...transitData, type: 'van' }); setSubView('transit_selection'); } },
-            { icon: 'package_2', label: 'Envios', color: 'bg-purple-100 text-purple-600' },
-            { icon: 'shopping_cart', label: 'Mercado', color: 'bg-brand-100 text-brand-600' },
-            { icon: 'medication', label: 'Farmácia', color: 'bg-blue-100 text-blue-600' },
-            { icon: 'front_loader', label: 'Cargas', color: 'bg-slate-100 text-slate-600', action: () => { setTransitData({ ...transitData, type: 'utilitario' }); setSubView('transit_selection'); } },
-          ].map((cat, i) => (
-            <div key={i} onClick={cat.action} className="flex flex-col items-center gap-2 cursor-pointer active:scale-95 transition-transform">
-              <div className={`w-[72px] h-[72px] rounded-[24px] flex items-center justify-center ${cat.color} shadow-soft`}>
-                <span className="material-symbols-rounded text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>{cat.icon}</span>
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-tight text-slate-700">{cat.label}</span>
+          {/* Promotions Carousel - CINEMATIC */}
+          <div className="space-y-4">
+            <div className="px-6 flex items-center justify-between">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">Promoções Incríveis 💫</h3>
+              <button className="text-[10px] font-black text-brand-600 uppercase tracking-widest">Ver Todas</button>
             </div>
-          ))}
-        </div>
+            <div className="flex gap-4 overflow-x-auto px-6 pb-2 hide-scrollbar">
+              {promotions.map((promo) => (
+                <div key={promo.id} className={`shrink-0 w-[300px] h-[160px] rounded-[36px] ${promo.color} p-6 relative overflow-hidden shadow-lg shadow-black/5`}>
+                  <div className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-30" style={{ backgroundImage: `url('${promo.img}')` }}></div>
+                  <div className="relative z-10 flex flex-col h-full justify-between">
+                    <div>
+                      <h4 className="text-white text-2xl font-black leading-tight">{promo.title}</h4>
+                      <p className="text-white/80 text-xs font-bold mt-1">{promo.desc}</p>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-2xl w-fit flex items-center gap-2 border border-white/30">
+                      <span className="text-[10px] font-black text-white tracking-[0.2em]">{promo.code}</span>
+                      <span className="material-symbols-rounded text-xs text-white">content_copy</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <div className="w-full bg-slate-900 rounded-[32px] p-6 relative overflow-hidden shadow-float cursor-pointer active:scale-[0.98] transition-transform" onClick={() => setSubView('restaurant_list')}>
-          <div className="absolute -right-10 -top-10 w-48 h-48 bg-brand-500/30 rounded-full blur-[40px]"></div>
-          <h3 className="text-brand-400 font-bold text-xs uppercase tracking-widest mb-2">Especial de Hoje</h3>
-          <h2 className="text-white text-2xl font-black leading-tight mb-4 max-w-[200px]">Peça e ganhe<br />Frete Grátis</h2>
-          <button className="bg-white text-slate-900 font-bold text-sm px-6 py-2.5 rounded-full pointer-events-none">Fazer Pedido</button>
-        </div>
+          {/* Hot Products - Flash Sales */}
+          <div className="space-y-4">
+            <div className="px-6">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">Mais Vendidos da Semana 🔥</h3>
+            </div>
+            <div className="flex gap-4 overflow-x-auto px-6 pb-4 hide-scrollbar">
+              {bestSellers.map((prod) => (
+                <div key={prod.id} className="shrink-0 w-[140px] flex flex-col gap-3 group">
+                  <div className="w-full aspect-square rounded-[32px] bg-slate-200 bg-cover bg-center shadow-sm group-hover:shadow-md transition-all relative overflow-hidden" style={{ backgroundImage: `url('${prod.img}')` }}>
+                    <div className="absolute bottom-3 right-3 w-9 h-9 bg-white rounded-full flex items-center justify-center text-slate-900 shadow-lg active:scale-95 transition-transform cursor-pointer">
+                      <span className="material-symbols-rounded text-xl">add</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[8px] font-black text-brand-600 uppercase tracking-widest mb-1">{prod.shop}</p>
+                    <h4 className="text-[11px] font-black text-slate-900 leading-tight mb-1 truncate">{prod.name}</h4>
+                    <p className="text-sm font-black text-slate-900 tracking-tighter">R$ {prod.price.toFixed(2).replace('.', ',')}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <div>
-          <h3 className="text-lg font-black text-slate-900 tracking-tight mb-4">Entregadores na Região</h3>
-          <div className="w-full h-48 bg-slate-200 rounded-[32px] relative overflow-hidden shadow-soft border border-white">
-            <div className="absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop')" }}></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-6">
-              <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-brand-400 animate-pulse shadow-[0_0_8px_#4ade80]"></div>
-                <span className="text-xs font-bold text-slate-800">{activeDrivers} online agora perto de você</span>
-              </div>
+          {/* Near Establishments - NEW UI */}
+          <div className="px-6 space-y-4 pb-10">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">Populares Perto de Você 📍</h3>
+            </div>
+            <div className="space-y-4">
+              {[
+                { name: 'Drogaria Vida', type: 'Farmácia', rating: '4.8', dist: '1.2km', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=300' },
+                { name: 'Supermercado Central', type: 'Mercado', rating: '4.5', dist: '0.8km', img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=300' },
+                { name: 'Petz Store VIP', type: 'Petshop', rating: '4.9', dist: '2.5km', img: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=300' }
+              ].map((shop, i) => (
+                <div key={i} className="bg-white p-4 rounded-[36px] shadow-sm border border-slate-100 flex items-center gap-4 active:scale-[0.98] transition-all cursor-pointer">
+                  <div className="w-20 h-20 rounded-[24px] bg-cover bg-center shadow-inner" style={{ backgroundImage: `url('${shop.img}')` }}></div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest">{shop.type}</span>
+                      <div className="size-1 rounded-full bg-slate-300"></div>
+                      <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest">{shop.dist}</span>
+                    </div>
+                    <h4 className="text-md font-black text-slate-900 tracking-tight">{shop.name}</h4>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <div className="flex items-center gap-1 text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full">
+                        <span className="material-symbols-rounded text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                        <span className="text-[10px] font-black">{shop.rating}</span>
+                      </div>
+                      <div className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-full">ABERTO</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const renderGenericList = () => {
+    if (!activeService) return null;
+
+    const data: any = {
+      market: {
+        title: 'Mercados e Atacados',
+        shops: [
+          { name: 'Supermercado Central', tag: 'Grãos e Limpeza', rating: '4.5', time: '45-60 min', img: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?q=80&w=300', freeDelivery: true },
+          { name: 'Mercado do Bairro', tag: 'Conveniência', rating: '4.8', time: '15-25 min', img: 'https://images.unsplash.com/photo-1604719312563-8912e9223c6a?q=80&w=300', freeDelivery: false }
+        ],
+        products: [
+          { id: 201, name: 'Leite Integral 1L', price: 5.90, desc: 'Leite tipo A, alta qualidade.' },
+          { id: 202, name: 'Arroz Agulhinha 5kg', price: 28.50, desc: 'Arroz soltinho polido.' }
+        ]
+      },
+      pharmacy: {
+        title: 'Farmácias e Saúde',
+        shops: [
+          { name: 'Drogaria Vida', tag: '24 Horas', rating: '4.9', time: '20-30 min', img: 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?q=80&w=300', freeDelivery: true },
+          { name: 'Pharma Mix', tag: 'Genéricos', rating: '4.6', time: '30-40 min', img: 'https://images.unsplash.com/photo-1631549916768-4119b295f136?q=80&w=300', freeDelivery: false }
+        ],
+        products: [
+          { id: 301, name: 'Vitamina C 1g', price: 18.20, desc: 'Efervescente, 10 comprimidos.' },
+          { id: 302, name: 'Protetor Solar FPS 50', price: 45.90, desc: 'Proteção UVA/UVB 200ml.' }
+        ]
+      },
+      pet: {
+        title: 'Pet Shops e Clínica',
+        shops: [
+          { name: 'Petz Store VIP', tag: 'Premium', rating: '4.9', time: '25-45 min', img: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?q=80&w=300', freeDelivery: true },
+          { name: 'Amigo Bicho', tag: 'Acessórios', rating: '4.7', time: '40-50 min', img: 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=300', freeDelivery: false }
+        ],
+        products: [
+          { id: 401, name: 'Ração Golden 3kg', price: 54.90, desc: 'Sabor carne para cães adultos.' },
+          { id: 402, name: 'Brinquedo Mordedor', price: 15.00, desc: 'Borracha atóxica durável.' }
+        ]
+      },
+      beverages: {
+        title: 'Bebidas e Adegas',
+        shops: [
+          { name: 'Adega Top Prime', tag: 'Bebidas Geladas', rating: '4.8', time: '10-20 min', img: 'https://images.unsplash.com/photo-1528913135592-4abd73f8a0aa?q=80&w=300', freeDelivery: true },
+          { name: 'Cervejaria Artesanal', tag: 'Craft Beer', rating: '4.7', time: '30-45 min', img: 'https://images.unsplash.com/photo-1535958636474-b021ee887b13?q=80&w=300', freeDelivery: false }
+        ],
+        products: [
+          { id: 501, name: 'Vinho Tinto Chileno', price: 45.00, desc: 'Cabernet Sauvignon 750ml.' },
+          { id: 502, name: 'Pack Coca-Cola 350ml', price: 32.00, desc: 'Contém 12 latas.' }
+        ]
+      }
+    };
+    const serviceData = data[activeService.type] || { title: 'Serviços', shops: [] };
+
+    return (
+      <div className="absolute inset-0 z-40 bg-[#f8f9fc] flex flex-col hide-scrollbar overflow-y-auto pb-10" >
+        <header className="px-6 py-6 sticky top-0 z-20 glass-panel border-b-0 rounded-b-[40px] flex items-center justify-between gap-4">
+          <button onClick={() => setSubView('none')} className="flex items-center gap-2 bg-white px-4 py-2.5 rounded-full shadow-sm active:scale-95 transition-transform text-slate-900 border border-slate-100">
+            <span className="material-symbols-rounded text-xl">arrow_back</span>
+          </button>
+          <h2 className="text-xl font-black text-slate-900 tracking-tight flex-1 text-right">{serviceData.title}</h2>
+        </header>
+
+        <div className="px-6 py-4 space-y-6">
+          <section>
+            <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Estabelecimentos</h3>
+            <div className="space-y-4">
+              {serviceData.shops.map((shop: any, i: number) => (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  key={i}
+                  onClick={() => handleShopClick(shop)}
+                  className="bg-white p-4 rounded-[32px] flex items-center gap-4 shadow-sm border border-slate-100 cursor-pointer active:scale-95 transition-transform"
+                >
+                  <div className="w-20 h-20 rounded-[24px] bg-cover bg-center shadow-inner" style={{ backgroundImage: `url('${shop.img}')` }}></div>
+                  <div className="flex-1">
+                    <span className="text-[10px] font-black text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">{shop.tag}</span>
+                    <h4 className="text-md font-black text-slate-900 mt-1">{shop.name}</h4>
+                    <div className="flex items-center gap-3 mt-1 text-xs font-bold text-slate-500">
+                      <span className="flex items-center gap-1 text-amber-500"><span className="material-symbols-rounded text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>{shop.rating}</span>
+                      <span>•</span>
+                      <span>{shop.time}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+
+          {serviceData.products && (
+            <section>
+              <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Produtos Sugeridos</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {serviceData.products.map((p: any, i: number) => (
+                  <div key={i} className="bg-white p-5 rounded-[28px] border border-slate-100 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-[12px] font-black text-slate-900 leading-tight mb-2">{p.name}</h4>
+                      <p className="text-[10px] font-medium text-slate-400 line-clamp-2">{p.desc}</p>
+                    </div>
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-sm font-black text-slate-900">R$ {p.price.toFixed(2).replace('.', ',')}</span>
+                      <button onClick={() => handleAddToCart(p)} className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center active:scale-95 transition-transform">
+                        <span className="material-symbols-rounded text-sm">add</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      </div >
+    );
+  };
+
+  const orderStatuses: any = {
+    'pendente': 'pendente',
+    'pending': 'pendente',
+    'concluido': 'concluido',
+    'cancelado': 'cancelado'
+  };
 
   const renderRestaurantList = () => {
     const filters = ['Todos', 'Hambúrguer', 'Pizza', 'Japonesa', 'Bebidas'];
@@ -374,7 +649,7 @@ function App() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
                 key={i}
-                onClick={() => setSubView('restaurant_menu')}
+                onClick={() => handleShopClick(rest)}
                 className="bg-white p-4 rounded-[32px] flex items-center gap-4 shadow-soft cursor-pointer active:scale-95 transition-transform border border-transparent hover:border-brand-500/20"
               >
                 <div className="w-24 h-24 rounded-[24px] bg-slate-100 bg-cover bg-center" style={{ backgroundImage: `url('${rest.img}')` }}></div>
@@ -406,58 +681,109 @@ function App() {
 
 
   const renderRestaurantMenu = () => (
-    <div className="absolute inset-0 z-50 bg-background flex flex-col hide-scrollbar overflow-y-auto">
-      {/* Sticky Header with Back Button */}
-      <header className="fixed top-0 left-0 right-0 z-[60] px-6 py-6 pointer-events-none">
+    <div className="absolute inset-0 z-50 bg-[#f8f9fc] flex flex-col hide-scrollbar overflow-y-auto">
+      <header className="fixed top-0 left-0 right-0 z-[60] px-6 py-6 pointer-events-none flex items-center justify-between">
         <button
-          onClick={() => setSubView('restaurant_list')}
-          className="pointer-events-auto flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-full shadow-lg active:scale-95 transition-transform text-slate-900 border border-white/50"
+          onClick={() => setSubView(activeService ? 'generic_list' : 'restaurant_list')}
+          className="pointer-events-auto flex items-center justify-center w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg active:scale-95 transition-transform text-slate-900 border border-white/50"
         >
           <span className="material-symbols-rounded text-xl">arrow_back</span>
-          <span className="font-bold text-sm">Voltar</span>
         </button>
+        <div className="pointer-events-auto flex gap-2">
+          <button className="w-11 h-11 bg-white/90 backdrop-blur-md rounded-full shadow-lg flex items-center justify-center text-slate-900 border border-white/50"><span className="material-symbols-rounded text-xl">share</span></button>
+          <button className="w-11 h-11 bg-white/90 backdrop-blur-md rounded-full shadow-lg flex items-center justify-center text-slate-900 border border-white/50"><span className="material-symbols-rounded text-xl">search</span></button>
+        </div>
       </header>
 
-      <div className="relative w-full h-64 bg-cover bg-center shrink-0" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1000&auto=format&fit=crop')" }}>
-        <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
+      <div className="relative w-full h-[280px] bg-cover bg-center shrink-0" style={{ backgroundImage: `url('${selectedShop?.img || "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1000&auto=format&fit=crop"}')` }}>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#f8f9fc] via-transparent to-black/20"></div>
+        <div className="absolute bottom-14 left-6 right-6 flex items-end justify-between">
+          <div>
+            <span className="text-[10px] font-black text-white bg-brand-600 px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg">{selectedShop?.tag || 'Lanches'}</span>
+            <h2 className="text-4xl font-black text-slate-900 tracking-tighter mt-3">{selectedShop?.name || 'Burger Premium'}</h2>
+          </div>
+          <div className="bg-white px-4 py-2.5 rounded-[22px] shadow-xl flex items-center gap-2 mb-1">
+            <span className="material-symbols-rounded text-amber-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+            <span className="font-black text-slate-900">{selectedShop?.rating || '4.9'}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 bg-background -mt-10 rounded-t-[40px] px-6 pt-8 pb-32 relative">
-        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Burger Premium</h2>
-        <p className="text-slate-500 font-bold mt-1">Lanches artesanais e bebidas.</p>
+      <div className="flex-1 bg-[#f8f9fc] -mt-8 rounded-t-[40px] relative">
+        <div className="px-6 pt-2 sticky top-[80px] z-40 bg-[#f8f9fc]/80 backdrop-blur-xl py-4 border-b border-slate-100">
+          <div className="flex gap-4 overflow-x-auto hide-scrollbar">
+            {(selectedShop?.categories || [{ name: 'Destaques' }]).map((cat: any) => (
+              <button
+                key={cat.name}
+                onClick={() => {
+                  setActiveMenuCategory(cat.name);
+                  document.getElementById(cat.name)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className={`whitespace-nowrap px-6 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all ${activeMenuCategory === cat.name ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900 bg-white border border-slate-100'}`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <div className="mt-8 space-y-6">
-          <h3 className="text-lg font-black text-slate-900 mb-4">Populares</h3>
-          {[
-            { id: 1, name: 'Double Smash Burger', desc: 'Pão brioche, 2 blends de 100g, cheddar, bacon e molho especial.', price: 34.90 },
-            { id: 2, name: 'Combo Classic', desc: 'Smash Burger + Fritas rústicas + Refrigerante Lata.', price: 42.50 },
-            { id: 3, name: 'Fritas com Cheddar', desc: 'Porção de 300g com molho de cheddar e farofa de bacon.', price: 22.00 }
-          ].map((item, i) => (
-            <div key={i} className="bg-white p-5 rounded-[28px] shadow-soft border border-slate-100 flex justify-between items-center gap-4">
-              <div className="flex-1 cursor-pointer" onClick={() => {
-                setSelectedItem(item);
-                setTempQuantity(1);
-                setSubView('product_detail');
-              }}>
-                <h4 className="text-base font-black text-slate-900">{item.name}</h4>
-                <p className="text-sm font-medium text-slate-500 mt-1 line-clamp-2">{item.desc}</p>
-                <p className="text-brand-600 font-black mt-2">R$ {item.price.toFixed(2).replace('.', ',')}</p>
+        <div className="px-6 pt-6 pb-32 space-y-12">
+          {(selectedShop?.categories || [
+            {
+              name: 'Destaques', items: [
+                { id: 1, name: 'Double Smash Burger', desc: 'Pão brioche, 2 blends de 100g, cheddar, bacon e molho especial.', price: 34.90 },
+                { id: 2, name: 'Combo Classic', desc: 'Smash Burger + Fritas rústicas + Refrigerante Lata.', price: 42.50 },
+                { id: 3, name: 'Fritas com Cheddar', desc: 'Porção de 300g com molho de cheddar e farofa de bacon.', price: 22.00 }
+              ]
+            }
+          ]).map((category: any) => (
+            <div key={category.name} id={category.name} className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-brand-500 rounded-full shadow-[0_0_8px_#4ade80]"></div>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase tracking-[0.1em] text-sm">{category.name}</h3>
+                </div>
+                <span className="text-[10px] font-black text-slate-400">{category.items.length} ITENS</span>
               </div>
-              <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-full border border-slate-100">
-                <button
-                  onClick={() => handleRemoveFromCart(item.id)}
-                  disabled={getItemCount(item.id) === 0}
-                  className="w-10 h-10 rounded-full bg-white text-slate-400 flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50 shadow-soft"
-                >
-                  <span className="material-symbols-rounded">remove</span>
-                </button>
-                <span className="font-black text-slate-900 w-4 text-center">{getItemCount(item.id)}</span>
-                <button
-                  onClick={() => handleAddToCart(item)}
-                  className="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center active:scale-95 transition-transform shadow-soft"
-                >
-                  <span className="material-symbols-rounded">add</span>
-                </button>
+              <div className="grid grid-cols-1 gap-4">
+                {category.items.map((item: any, i: number) => (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    key={i}
+                    className="bg-white p-5 rounded-[32px] shadow-sm border border-slate-50 flex justify-between items-center gap-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex-1 cursor-pointer" onClick={() => {
+                      setSelectedItem(item);
+                      setTempQuantity(1);
+                      setSubView('product_detail');
+                    }}>
+                      <h4 className="text-md font-black text-slate-900 tracking-tight">{item.name}</h4>
+                      <p className="text-[11px] font-medium text-slate-400 mt-1 line-clamp-2 leading-relaxed">{item.desc}</p>
+                      <p className="text-slate-900 font-black mt-3 text-lg tracking-tighter">R$ {item.price.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-2 bg-slate-50 p-1.5 rounded-[22px] border border-slate-100 shadow-inner">
+                      <button
+                        onClick={() => handleAddToCart(item)}
+                        className="w-11 h-11 rounded-[18px] bg-slate-900 text-white flex items-center justify-center active:scale-95 transition-all shadow-lg shadow-black/10"
+                      >
+                        <span className="material-symbols-rounded">add</span>
+                      </button>
+                      {getItemCount(item.id) > 0 && (
+                        <div className="flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
+                          <span className="font-black text-slate-900 text-sm py-1">{getItemCount(item.id)}</span>
+                          <button
+                            onClick={() => handleRemoveFromCart(item.id)}
+                            className="w-11 h-11 rounded-[18px] bg-white text-slate-400 flex items-center justify-center active:scale-95 transition-all border border-slate-100"
+                          >
+                            <span className="material-symbols-rounded">remove</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
               </div>
             </div>
           ))}
@@ -1047,6 +1373,7 @@ function App() {
 
             {/* Sub Views */}
             <AnimatePresence>
+              {subView === 'generic_list' && <motion.div key="glist" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40">{renderGenericList()}</motion.div>}
               {subView === 'restaurant_list' && <motion.div key="rlist" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40">{renderRestaurantList()}</motion.div>}
               {subView === 'restaurant_menu' && <motion.div key="rmenu" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-50">{renderRestaurantMenu()}</motion.div>}
               {subView === 'product_detail' && <motion.div key="pdetail" initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', bounce: 0, duration: 0.4 }} className="absolute inset-0 z-[70]">{renderProductDetail()}</motion.div>}
